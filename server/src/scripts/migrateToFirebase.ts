@@ -11,15 +11,35 @@ dotenv.config();
 // Make sure to have your serviceAccountKey.json in the root or set ENV vars
 if (!admin.apps.length) {
   try {
+    console.log('Project ID:', process.env.FIREBASE_PROJECT_ID);
+    console.log('Client Email:', process.env.FIREBASE_CLIENT_EMAIL);
+    console.log('Private Key length:', process.env.FIREBASE_PRIVATE_KEY?.length);
+
+    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
+      throw new Error("Missing Firebase credentials in environment variables");
+    }
+
+    let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+    // Handle quotes if they were included in the variable value
+    if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+      privateKey = privateKey.substring(1, privateKey.length - 1);
+    }
+    // Convert literal \n strings to actual newlines
+    privateKey = privateKey.replace(/\\n/g, '\n');
+
+    console.log('Private Key starts with:', privateKey.substring(0, 30));
+    console.log('Private Key ends with:', privateKey.substring(privateKey.length - 30));
+    console.log('Has newlines:', privateKey.includes('\n'));
+
     admin.initializeApp({
       credential: admin.credential.cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        privateKey: privateKey,
       } as admin.ServiceAccount),
     });
-  } catch (e) {
-    console.error("Please provide Firebase credentials in .env");
+  } catch (e: any) {
+    console.error("❌ Error initializing Firebase Admin:", e.message);
     process.exit(1);
   }
 }
