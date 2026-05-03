@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/index.ts",
-    "migrate": "ts-node src/scripts/migrateToFirebase.ts",
+    "dev": "nodemon --exec ts-node --transpile-only src/index.ts",
+    "migrate": "ts-node --transpile-only src/scripts/migrateToFirebase.ts",
+    "seed": "ts-node --transpile-only src/scripts/seedFirebase.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

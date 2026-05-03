@@ -173,7 +173,8 @@ router.get('/orders/worker', authenticate, authorize(['WORKER']), async (req: Re
 // Update order status
 router.patch('/orders/:id/status', authenticate, authorize(['WORKER', 'CLIENT']), async (req: Request, res: Response) => {
   try {
-    const orderId = req.params.id;
+    const orderId = req.query.orderId as string;
+    if (!orderId) return res.status(400).json({ message: 'Missing orderId' });
     const { status } = req.body;
     const orderRef = db.collection('orders').doc(orderId);
     const orderDoc = await orderRef.get();
@@ -216,7 +217,7 @@ router.get('/notifications', authenticate, async (req: Request, res: Response) =
 
 router.patch('/notifications/:id/read', authenticate, async (req: Request, res: Response) => {
   try {
-    await db.collection('notifications').doc(req.params.id).update({ isRead: true });
+    await db.collection('notifications').doc(req.params.id as string).update({ isRead: true });
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ message: 'Error updating notification' });
@@ -226,14 +227,14 @@ router.patch('/notifications/:id/read', authenticate, async (req: Request, res: 
 // Messages
 router.get('/orders/:id/messages', authenticate, async (req: Request, res: Response) => {
   try {
-    const orderId = req.params.id;
+    const orderId = req.params.id as string;
     const snapshot = await db.collection('messages').where('orderId', '==', orderId).get();
     const messages = await Promise.all(snapshot.docs.map(async doc => {
       const msg = doc.data();
       const senderDoc = await db.collection('users').doc(msg.senderId).get();
       return { id: doc.id, ...msg, sender: { name: senderDoc.data()?.name, id: senderDoc.id } };
     }));
-    res.json(messages.sort((a, b) => a.createdAt.localeCompare(b.createdAt)));
+    res.json(messages.sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()));
   } catch (error) {
     res.status(500).json({ message: 'Error fetching messages' });
   }

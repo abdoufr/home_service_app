@@ -11,13 +11,13 @@ router.use(authenticate, authorize(['ADMIN']));
 router.get('/users', async (req: Request, res: Response) => {
   try {
     const { status } = req.query;
-    let query = db.collection('users').where('role', '!=', 'ADMIN');
+    const snapshot = await db.collection('users').get();
+    let users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     
-    if (status === 'pending') query = query.where('approved', '==', false);
-    if (status === 'approved') query = query.where('approved', '==', true);
+    users = users.filter((u: any) => u.role !== 'ADMIN');
+    if (status === 'pending') users = users.filter((u: any) => u.approved === false);
+    if (status === 'approved') users = users.filter((u: any) => u.approved === true);
 
-    const snapshot = await query.get();
-    const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     res.json(users.sort((a:any, b:any) => (b.createdAt || '').localeCompare(a.createdAt || '')));
   } catch (error) {
     res.status(500).json({ message: 'Error fetching users' });
