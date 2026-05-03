@@ -20,16 +20,27 @@ if (!admin.apps.length) {
     }
 
     let privateKey = process.env.FIREBASE_PRIVATE_KEY;
-    // Handle quotes if they were included in the variable value
+    if (!privateKey) throw new Error("FIREBASE_PRIVATE_KEY is empty");
+
+    // Remove surrounding quotes if present
+    privateKey = privateKey.trim();
     if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
       privateKey = privateKey.substring(1, privateKey.length - 1);
+    } else if (privateKey.startsWith("'") && privateKey.endsWith("'")) {
+      privateKey = privateKey.substring(1, privateKey.length - 1);
     }
-    // Convert literal \n strings to actual newlines
-    privateKey = privateKey.replace(/\\n/g, '\n');
 
-    console.log('Private Key starts with:', privateKey.substring(0, 30));
-    console.log('Private Key ends with:', privateKey.substring(privateKey.length - 30));
-    console.log('Has newlines:', privateKey.includes('\n'));
+    // Convert literal \n to real newlines
+    privateKey = privateKey.replace(/\\n/g, '\n');
+    
+    // Ensure it starts and ends correctly
+    privateKey = privateKey.trim();
+
+    console.log('--- Key Debug ---');
+    console.log('Length:', privateKey.length);
+    console.log('Header match:', privateKey.startsWith('-----BEGIN PRIVATE KEY-----'));
+    console.log('Footer match:', privateKey.endsWith('-----END PRIVATE KEY-----'));
+    console.log('--- End Debug ---');
 
     admin.initializeApp({
       credential: admin.credential.cert({
