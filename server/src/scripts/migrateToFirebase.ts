@@ -1,56 +1,22 @@
 import { PrismaClient } from '@prisma/client';
 import admin from 'firebase-admin';
 import * as dotenv from 'dotenv';
-import path from 'path';
-
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 
 dotenv.config();
 
-// Initialize Firebase Admin (using local service account for migration)
-// Make sure to have your serviceAccountKey.json in the root or set ENV vars
+// Initialize Firebase Admin using serviceAccountKey.json (most reliable method)
 if (!admin.apps.length) {
   try {
-    console.log('Project ID:', process.env.FIREBASE_PROJECT_ID);
-    console.log('Client Email:', process.env.FIREBASE_CLIENT_EMAIL);
-    console.log('Private Key length:', process.env.FIREBASE_PRIVATE_KEY?.length);
-
-    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
-      throw new Error("Missing Firebase credentials in environment variables");
-    }
-
-    let privateKey = process.env.FIREBASE_PRIVATE_KEY;
-    if (!privateKey) throw new Error("FIREBASE_PRIVATE_KEY is empty");
-
-    // Remove surrounding quotes if present
-    privateKey = privateKey.trim();
-    if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
-      privateKey = privateKey.substring(1, privateKey.length - 1);
-    } else if (privateKey.startsWith("'") && privateKey.endsWith("'")) {
-      privateKey = privateKey.substring(1, privateKey.length - 1);
-    }
-
-    // Convert literal \n to real newlines
-    privateKey = privateKey.replace(/\\n/g, '\n');
-    
-    // Ensure it starts and ends correctly
-    privateKey = privateKey.trim();
-
-    console.log('--- Key Debug ---');
-    console.log('Length:', privateKey.length);
-    console.log('Header match:', privateKey.startsWith('-----BEGIN PRIVATE KEY-----'));
-    console.log('Footer match:', privateKey.endsWith('-----END PRIVATE KEY-----'));
-    console.log('--- End Debug ---');
-
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const serviceAccount = require('../../serviceAccountKey.json');
     admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: privateKey,
-      } as admin.ServiceAccount),
+      credential: admin.credential.cert(serviceAccount),
     });
+    console.log('✅ Firebase Admin Initialized via serviceAccountKey.json');
   } catch (e: any) {
-    console.error("❌ Error initializing Firebase Admin:", e.message);
+    console.error('❌ Could not load serviceAccountKey.json:', e.message);
+    console.error('👉 Make sure serviceAccountKey.json is in the /server/ directory');
     process.exit(1);
   }
 }
@@ -60,89 +26,111 @@ const prisma = new PrismaClient({ adapter });
 const db = admin.firestore();
 
 async function migrate() {
-  console.log('🚀 Starting migration to Firebase...');
+  console.log('🚀 Starting migration SQLite → Firebase Firestore...\n');
 
   // 1. Categories
-  console.log('--- Migrating Categories ---');
+  console.log('📁 [1/6] Migrating Categories...');
   const categories = await prisma.category.findMany();
   for (const cat of categories) {
     await db.collection('categories').doc(cat.id).set({
+      id: cat.id,
       name: cat.name,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: cat.createdAt.toISOString(),
     });
   }
+  console.log(`   ✅ ${categories.length} categories migrated`);
 
   // 2. Users
-  console.log('--- Migrating Users ---');
+  console.log('👤 [2/6] Migrating Users...');
   const users = await prisma.user.findMany();
   for (const user of users) {
     await db.collection('users').doc(user.id).set({
+      id: user.id,
       email: user.email,
+      password: user.password,
       name: user.name,
-      phone: user.phone,
+      phone: user.phone ?? null,
       role: user.role,
       approved: user.approved,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: user.createdAt.toISOString(),
     });
-    // Note: Passwords are NOT migrated to Firebase Auth here as they are Bcrypt hashed.
-    // You should use Firebase Auth Import for that if needed.
   }
+  console.log(`   ✅ ${users.length} users migrated`);
 
   // 3. Services
-  console.log('--- Migrating Services ---');
+  console.log('🔧 [3/6] Migrating Services...');
   const services = await prisma.service.findMany();
   for (const srv of services) {
     await db.collection('services').doc(srv.id).set({
+      id: srv.id,
       title: srv.title,
       description: srv.description,
       price: srv.price,
       workerId: srv.workerId,
       categoryId: srv.categoryId,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: srv.createdAt.toISOString(),
     });
   }
+  console.log(`   ✅ ${services.length} services migrated`);
 
   // 4. Orders
-  console.log('--- Migrating Orders ---');
+  console.log('📋 [4/6] Migrating Orders...');
   const orders = await prisma.order.findMany();
   for (const ord of orders) {
     await db.collection('orders').doc(ord.id).set({
+      id: ord.id,
       clientId: ord.clientId,
       serviceId: ord.serviceId,
       status: ord.status,
-      scheduledAt: ord.scheduledAt ? admin.firestore.Timestamp.fromDate(ord.scheduledAt) : null,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      scheduledAt: ord.scheduledAt ? ord.scheduledAt.toISOString() : null,
+      createdAt: ord.createdAt.toISOString(),
     });
   }
+  console.log(`   ✅ ${orders.length} orders migrated`);
 
   // 5. Messages
-  console.log('--- Migrating Messages ---');
+  console.log('💬 [5/6] Migrating Messages...');
   const messages = await prisma.message.findMany();
   for (const msg of messages) {
     await db.collection('messages').doc(msg.id).set({
+      id: msg.id,
       orderId: msg.orderId,
       senderId: msg.senderId,
       content: msg.content,
       isRead: msg.isRead,
-      createdAt: admin.firestore.Timestamp.fromDate(msg.createdAt),
+      createdAt: msg.createdAt.toISOString(),
     });
   }
+  console.log(`   ✅ ${messages.length} messages migrated`);
 
   // 6. Notifications
-  console.log('--- Migrating Notifications ---');
+  console.log('🔔 [6/6] Migrating Notifications...');
   const notifs = await prisma.notification.findMany();
   for (const n of notifs) {
     await db.collection('notifications').doc(n.id).set({
+      id: n.id,
       userId: n.userId,
       type: n.type,
       content: n.content,
-      linkId: n.linkId,
+      linkId: n.linkId ?? null,
       isRead: n.isRead,
-      createdAt: admin.firestore.Timestamp.fromDate(n.createdAt),
+      createdAt: n.createdAt.toISOString(),
     });
   }
+  console.log(`   ✅ ${notifs.length} notifications migrated`);
 
-  console.log('✅ Migration complete!');
+  // 7. Settings
+  console.log('⚙️  [+] Migrating Settings...');
+  const settings = await prisma.settings.findFirst();
+  if (settings) {
+    await db.collection('settings').doc('global').set({
+      autoApproveUsers: settings.autoApproveUsers,
+      autoApproveWorkers: settings.autoApproveWorkers,
+    });
+    console.log(`   ✅ Settings migrated`);
+  }
+
+  console.log('\n🎉 Migration complete! All data is now in Firebase Firestore.');
   process.exit(0);
 }
 
