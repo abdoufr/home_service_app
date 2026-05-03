@@ -28,9 +28,9 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
   const fetchAll = async () => {
     try {
       const [srvRes, ordRes, catRes] = await Promise.all([
-        fetch('http://localhost:3000/api/services', { credentials: 'include' }),
-        fetch('http://localhost:3000/api/services/orders/client', { credentials: 'include' }),
-        fetch('http://localhost:3000/api/services/categories', { credentials: 'include' })
+        fetch('/api/services', { credentials: 'include' }),
+        fetch('/api/services/orders/client', { credentials: 'include' }),
+        fetch('/api/services/categories', { credentials: 'include' })
       ]);
       setServices(srvRes.ok ? await srvRes.json() : []);
       setOrders(ordRes.ok ? await ordRes.json() : []);
@@ -55,7 +55,7 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
       return;
     }
 
-    const res = await fetch('http://localhost:3000/api/services/orders', {
+    const res = await fetch('/api/services/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -70,7 +70,7 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
 
   const handleCancel = async (orderId: string) => {
     if (!window.confirm(lang === 'ar' ? "هل أنت متأكد؟" : "Annuler?")) return;
-    const res = await fetch(`http://localhost:3000/api/services/orders/${orderId}/status`, {
+    const res = await fetch(`/api/services/orders/${orderId}/status`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

@@ -32,9 +32,9 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
   const fetchAll = async () => {
     try {
       const [srvRes, ordRes, catRes] = await Promise.all([
-        fetch('http://localhost:3000/api/services/worker/me', { credentials: 'include' }),
-        fetch('http://localhost:3000/api/services/orders/worker', { credentials: 'include' }),
-        fetch('http://localhost:3000/api/services/categories', { credentials: 'include' })
+        fetch('/api/services/worker/me', { credentials: 'include' }),
+        fetch('/api/services/orders/worker', { credentials: 'include' }),
+        fetch('/api/services/categories', { credentials: 'include' })
       ]);
       setServices(srvRes.ok ? await srvRes.json() : []);
       setOrders(ordRes.ok ? await ordRes.json() : []);
@@ -52,7 +52,7 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
 
   const handleCreateService = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch('http://localhost:3000/api/services', {
+    const res = await fetch('/api/services', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -68,7 +68,7 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
 
   const handleDeleteService = async (id: string) => {
     if (!window.confirm(lang === 'ar' ? "هل أنت متأكد؟" : "Confirm?")) return;
-    const res = await fetch(`http://localhost:3000/api/services/${id}`, {
+    const res = await fetch(`/api/services/${id}`, {
       method: 'DELETE',
       credentials: 'include'
     });
@@ -76,7 +76,7 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
   };
 
   const handleUpdateStatus = async (orderId: string, status: string) => {
-    const res = await fetch(`http://localhost:3000/api/services/orders/${orderId}/status`, {
+    const res = await fetch(`/api/services/orders/${orderId}/status`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

@@ -9,7 +9,7 @@ export default function ChatModal({ orderId, onClose, currentUserId, orderStatus
   const isRTL = lang === 'ar';
 
   const fetchMessages = async () => {
-    const res = await fetch(`http://localhost:3000/api/services/orders/${orderId}/messages`, { credentials: 'include' });
+    const res = await fetch(`/api/services/orders/${orderId}/messages`, { credentials: 'include' });
     if (res.ok) setMessages(await res.json());
   };
 
@@ -26,7 +26,7 @@ export default function ChatModal({ orderId, onClose, currentUserId, orderStatus
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim()) return;
-    const res = await fetch(`http://localhost:3000/api/services/orders/${orderId}/messages`, {
+    const res = await fetch(`/api/services/orders/${orderId}/messages`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -42,7 +42,7 @@ export default function ChatModal({ orderId, onClose, currentUserId, orderStatus
   const deleteDiscussion = async () => {
     const confirmMsg = isRTL ? 'هل تريد حذف المحادثة من جانبك؟ سيظل الطرف الآخر قادراً على رؤيتها.' : 'Supprimer la discussion de votre côté ? L\'autre personne pourra toujours la voir.';
     if (!window.confirm(confirmMsg)) return;
-    const res = await fetch(`http://localhost:3000/api/services/orders/${orderId}/messages`, {
+    const res = await fetch(`/api/services/orders/${orderId}/messages`, {
       method: 'DELETE',
       credentials: 'include'
     });

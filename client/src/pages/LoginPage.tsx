@@ -20,7 +20,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:3000/api/auth/login', {
+      const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -46,7 +46,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:3000/api/auth/google';
+    window.location.href = '/api/auth/google';
   };
 
   return (

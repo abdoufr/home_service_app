@@ -25,7 +25,7 @@ export default function RegisterPage({ onLogin }: RegisterPageProps) {
   const navigate = useNavigate();
 
   const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:3000/api/auth/google';
+    window.location.href = '/api/auth/google';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,7 +44,7 @@ export default function RegisterPage({ onLogin }: RegisterPageProps) {
 
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/api/auth/register', {
+      const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -59,7 +59,7 @@ export default function RegisterPage({ onLogin }: RegisterPageProps) {
 
       // Auto-login after registration for clients
       if (role === 'CLIENT') {
-        const loginRes = await fetch('http://localhost:3000/api/auth/login', {
+        const loginRes = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',

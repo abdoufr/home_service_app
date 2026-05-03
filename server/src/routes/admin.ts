@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { prisma } from '../index';
+import { db } from '../config/firebase';
 import { authenticate, authorize } from '../middleware/auth';
 
 const router = Router();
@@ -7,187 +7,172 @@ const router = Router();
 // All admin routes require authentication + ADMIN role
 router.use(authenticate, authorize(['ADMIN']));
 
-// ── GET /api/admin/users — list all non-admin users ──────────────────────────
+// List users
 router.get('/users', async (req: Request, res: Response) => {
   try {
-    const { status } = req.query; // ?status=pending | approved | all
-    const users = await prisma.user.findMany({
-      where: {
-        role: { not: 'ADMIN' },
-        ...(status === 'pending' ? { approved: false } : {}),
-        ...(status === 'approved' ? { approved: true } : {}),
-      },
-      select: {
-        id: true, email: true, name: true, role: true,
-        approved: true, createdAt: true
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-    res.json(users);
-  } catch {
+    const { status } = req.query;
+    let query = db.collection('users').where('role', '!=', 'ADMIN');
+    
+    if (status === 'pending') query = query.where('approved', '==', false);
+    if (status === 'approved') query = query.where('approved', '==', true);
+
+    const snapshot = await query.get();
+    const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.json(users.sort((a:any, b:any) => (b.createdAt || '').localeCompare(a.createdAt || '')));
+  } catch (error) {
     res.status(500).json({ message: 'Error fetching users' });
   }
 });
 
-// ── PATCH /api/admin/users/:id/approve — approve a user ──────────────────────
+// Approve user
 router.patch('/users/:id/approve', async (req: Request, res: Response) => {
   try {
-    const user = await prisma.user.update({
-      where: { id: req.params.id as string },
-      data: { approved: true },
-      select: { id: true, name: true, email: true, role: true, approved: true },
-    });
-    res.json({ message: 'User approved', user });
-  } catch {
+    await db.collection('users').doc(req.params.id).update({ approved: true });
+    res.json({ message: 'User approved' });
+  } catch (error) {
     res.status(404).json({ message: 'User not found' });
   }
 });
 
-// ── PATCH /api/admin/users/:id/reject — reject (delete) a user ───────────────
+// Delete user
 router.delete('/users/:id', async (req: Request, res: Response) => {
   try {
-    await prisma.user.delete({ where: { id: req.params.id as string } });
-    res.json({ message: 'User rejected and removed' });
-  } catch {
+    await db.collection('users').doc(req.params.id).delete();
+    res.json({ message: 'User deleted' });
+  } catch (error) {
     res.status(404).json({ message: 'User not found' });
   }
 });
 
-// ── GET /api/admin/settings — get current approval settings ──────────────────
+// Settings
 router.get('/settings', async (_req: Request, res: Response) => {
   try {
-    let settings = await prisma.settings.findFirst();
-    if (!settings) {
-      settings = await prisma.settings.create({
-        data: { autoApproveUsers: true, autoApproveWorkers: false },
-      });
+    const doc = await db.collection('settings').doc('global').get();
+    if (!doc.exists) {
+      const defaultSettings = { autoApproveUsers: true, autoApproveWorkers: false };
+      await db.collection('settings').doc('global').set(defaultSettings);
+      return res.json(defaultSettings);
     }
-    res.json(settings);
-  } catch {
+    res.json(doc.data());
+  } catch (error) {
     res.status(500).json({ message: 'Error fetching settings' });
   }
 });
 
-// ── PATCH /api/admin/settings — update approval settings ─────────────────────
 router.patch('/settings', async (req: Request, res: Response) => {
   try {
     const { autoApproveUsers, autoApproveWorkers } = req.body;
-    let settings = await prisma.settings.findFirst();
-    if (!settings) {
-      settings = await prisma.settings.create({
-        data: { autoApproveUsers, autoApproveWorkers },
-      });
-    } else {
-      settings = await prisma.settings.update({
-        where: { id: settings.id },
-        data: {
-          ...(autoApproveUsers !== undefined ? { autoApproveUsers } : {}),
-          ...(autoApproveWorkers !== undefined ? { autoApproveWorkers } : {}),
-        },
-      });
-    }
-    res.json(settings);
-  } catch {
+    const settingsRef = db.collection('settings').doc('global');
+    await settingsRef.set({
+      autoApproveUsers: autoApproveUsers ?? true,
+      autoApproveWorkers: autoApproveWorkers ?? false
+    }, { merge: true });
+    res.json({ autoApproveUsers, autoApproveWorkers });
+  } catch (error) {
     res.status(500).json({ message: 'Error updating settings' });
   }
 });
 
-// ── GET /api/admin/stats ─────────────────────────────────────────────────────
+// Stats
 router.get('/stats', async (_req: Request, res: Response) => {
   try {
-    const [totalUsers, totalServices, totalOrders, pendingUsers] = await Promise.all([
-      prisma.user.count({ where: { role: { not: 'ADMIN' } } }),
-      prisma.service.count(),
-      prisma.order.count(),
-      prisma.user.count({ where: { approved: false } }),
+    const [users, services, orders] = await Promise.all([
+      db.collection('users').get(),
+      db.collection('services').get(),
+      db.collection('orders').get()
     ]);
-    res.json({ totalUsers, totalServices, totalOrders, pendingUsers });
-  } catch {
+    
+    const totalUsers = users.docs.filter(d => d.data().role !== 'ADMIN').length;
+    const pendingUsers = users.docs.filter(d => d.data().approved === false).length;
+
+    res.json({
+      totalUsers,
+      totalServices: services.size,
+      totalOrders: orders.size,
+      pendingUsers
+    });
+  } catch (error) {
     res.status(500).json({ message: 'Error fetching stats' });
   }
 });
 
-// CATEGORIES (Moved to services.ts for accessibility)
-
-
+// Categories
 router.post('/categories', async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
-    const category = await prisma.category.create({ data: { name } });
-    res.json(category);
-  } catch {
+    const ref = db.collection('categories').doc();
+    await ref.set({ name, createdAt: new Date().toISOString() });
+    res.json({ id: ref.id, name });
+  } catch (error) {
     res.status(500).json({ message: 'Error creating category' });
   }
 });
 
 router.delete('/categories/:id', async (req: Request, res: Response) => {
   try {
-    await prisma.category.delete({ where: { id: req.params.id as string } });
+    await db.collection('categories').doc(req.params.id).delete();
     res.json({ message: 'Category deleted' });
-  } catch {
+  } catch (error) {
     res.status(500).json({ message: 'Error deleting category' });
   }
 });
 
-// ── SUPPORT CHAT FOR ADMIN ───────────────────────────────────────────────────
-
-// Get all users who have support messages
+// Support
 router.get('/support/conversations', async (req: Request, res: Response) => {
   try {
-    const users = await prisma.user.findMany({
-      where: { supportMessages: { some: {} } },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        supportMessages: {
-          orderBy: { createdAt: 'desc' },
-          take: 1,
-          select: { content: true, createdAt: true, isRead: true }
-        }
-      }
-    });
-    res.json(users);
+    const snapshot = await db.collection('supportMessages').get();
+    const allMsgs = snapshot.docs.map(doc => doc.data());
+    const uniqueUserIds = Array.from(new Set(allMsgs.map(m => m.userId)));
+    
+    const conversations = await Promise.all(uniqueUserIds.map(async uid => {
+      const userDoc = await db.collection('users').doc(uid).get();
+      const lastMsgSnapshot = await db.collection('supportMessages').where('userId', '==', uid).get();
+      const lastMsg = lastMsgSnapshot.docs.map(d => d.data()).sort((a,b) => b.createdAt.localeCompare(a.createdAt))[0];
+      
+      return {
+        id: uid,
+        name: userDoc.data()?.name,
+        email: userDoc.data()?.email,
+        supportMessages: [lastMsg]
+      };
+    }));
+    
+    res.json(conversations);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching support conversations' });
   }
 });
 
-// Get messages for a user
 router.get('/support/messages/:userId', async (req: Request, res: Response) => {
   try {
-    const userId = req.params.userId as string;
-    const messages = await prisma.supportMessage.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'asc' }
-    });
-    res.json(messages);
+    const snapshot = await db.collection('supportMessages').where('userId', '==', req.params.userId).get();
+    const messages = snapshot.docs.map(doc => doc.data());
+    res.json(messages.sort((a:any, b:any) => a.createdAt.localeCompare(b.createdAt)));
   } catch (error) {
     res.status(500).json({ message: 'Error fetching messages' });
   }
 });
 
-// Reply to user
 router.post('/support/messages/:userId', async (req: Request, res: Response) => {
   try {
-    const userId = req.params.userId as string;
+    const { userId } = req.params;
     const { content } = req.body;
-    const message = await prisma.supportMessage.create({
-      data: { userId, content, isAdmin: true }
-    });
-    
-    // Notify user
-    await prisma.notification.create({
-      data: {
-        userId,
-        type: 'MESSAGE',
-        content: `Admin: ${content.substring(0, 50)}...`,
-        linkId: 'support'
-      }
+    const msgRef = db.collection('supportMessages').doc();
+    const msgData = { id: msgRef.id, userId, content, isAdmin: true, createdAt: new Date().toISOString() };
+    await msgRef.set(msgData);
+
+    const notifRef = db.collection('notifications').doc();
+    await notifRef.set({
+      id: notifRef.id,
+      userId,
+      type: 'MESSAGE',
+      content: `Admin: ${content.substring(0, 50)}...`,
+      linkId: 'support',
+      isRead: false,
+      createdAt: new Date().toISOString()
     });
 
-    res.json(message);
+    res.json(msgData);
   } catch (error) {
     res.status(500).json({ message: 'Error sending reply' });
   }

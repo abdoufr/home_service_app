@@ -20,7 +20,7 @@ export default function AdminDashboard({ t, lang }: { t: any, lang: string }) {
   const [supportConvs, setSupportConvs] = useState<any[]>([]);
 
   const api = (path: string, opts?: RequestInit) =>
-    fetch(`http://localhost:3000/api/admin${path}`, {
+    fetch(`/api/admin${path}`, {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       ...opts,
@@ -33,7 +33,7 @@ export default function AdminDashboard({ t, lang }: { t: any, lang: string }) {
         api('/stats'),
         api('/users?status=pending'),
         api('/users?status=all'),
-        fetch('http://localhost:3000/api/services/categories', { credentials: 'include' }),
+        fetch('/api/services/categories', { credentials: 'include' }),
         api('/support/conversations')
       ]);
       setSettings(await settingsRes.json());

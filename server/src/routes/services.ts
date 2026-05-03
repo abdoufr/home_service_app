@@ -1,13 +1,26 @@
 import { Router, Request, Response } from 'express';
-import { prisma } from '../index';
+import { db } from '../config/firebase';
 import { authenticate, authorize } from '../middleware/auth';
+import admin from 'firebase-admin';
 
 const router = Router();
+
+// Helper to get nested data (simulating joins)
+const getPopulatedService = async (srv: any) => {
+  const workerDoc = await db.collection('users').doc(srv.workerId).get();
+  const catDoc = await db.collection('categories').doc(srv.categoryId).get();
+  return {
+    ...srv,
+    worker: workerDoc.exists ? { name: workerDoc.data()?.name, email: workerDoc.data()?.email } : null,
+    category: catDoc.exists ? catDoc.data() : null
+  };
+};
 
 // Get categories
 router.get('/categories', async (req: Request, res: Response) => {
   try {
-    const categories = await prisma.category.findMany();
+    const snapshot = await db.collection('categories').get();
+    const categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     res.json(categories);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching categories' });
@@ -17,12 +30,10 @@ router.get('/categories', async (req: Request, res: Response) => {
 // Get all services
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const services = await prisma.service.findMany({
-      include: {
-        worker: { select: { name: true, email: true } },
-        category: true
-      }
-    });
+    const snapshot = await db.collection('services').get();
+    const services = await Promise.all(snapshot.docs.map(async doc => {
+      return getPopulatedService({ id: doc.id, ...doc.data() });
+    }));
     res.json(services);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching services' });
@@ -35,17 +46,18 @@ router.post('/', authenticate, authorize(['WORKER', 'ADMIN']), async (req: Reque
     const { title, description, price, categoryId } = req.body;
     const workerId = (req as any).user.userId;
 
-    const service = await prisma.service.create({
-      data: {
-        title,
-        description,
-        price,
-        categoryId,
-        workerId
-      }
-    });
-
-    res.status(201).json(service);
+    const serviceRef = db.collection('services').doc();
+    const serviceData = {
+      id: serviceRef.id,
+      title,
+      description,
+      price,
+      categoryId,
+      workerId,
+      createdAt: new Date().toISOString()
+    };
+    await serviceRef.set(serviceData);
+    res.status(201).json(serviceData);
   } catch (error) {
     res.status(500).json({ message: 'Error creating service' });
   }
@@ -57,25 +69,34 @@ router.post('/orders', authenticate, authorize(['CLIENT']), async (req: Request,
     const { serviceId, scheduledAt } = req.body;
     const clientId = (req as any).user.userId;
 
-    const order = await prisma.order.create({
-      data: {
-        serviceId,
-        clientId,
-        scheduledAt: scheduledAt ? new Date(scheduledAt) : null
-      },
-      include: { service: true }
+    const serviceDoc = await db.collection('services').doc(serviceId).get();
+    if (!serviceDoc.exists) return res.status(404).json({ message: 'Service not found' });
+    const service = serviceDoc.data();
+
+    const orderRef = db.collection('orders').doc();
+    const orderData = {
+      id: orderRef.id,
+      serviceId,
+      clientId,
+      status: 'PENDING',
+      scheduledAt: scheduledAt || null,
+      createdAt: new Date().toISOString()
+    };
+    await orderRef.set(orderData);
+
+    // Notify worker
+    const notifRef = db.collection('notifications').doc();
+    await notifRef.set({
+      id: notifRef.id,
+      userId: service?.workerId,
+      type: 'NEW_ORDER',
+      content: `Vous avez reçu une nouvelle commande pour "${service?.title}"`,
+      linkId: orderRef.id,
+      isRead: false,
+      createdAt: new Date().toISOString()
     });
 
-    await prisma.notification.create({
-      data: {
-        userId: order.service.workerId,
-        type: 'NEW_ORDER',
-        content: `Vous avez reçu une nouvelle commande pour "${order.service.title}"`,
-        linkId: order.id
-      }
-    });
-
-    res.status(201).json(order);
+    res.status(201).json({ ...orderData, service });
   } catch (error) {
     res.status(500).json({ message: 'Error placing order' });
   }
@@ -85,10 +106,11 @@ router.post('/orders', authenticate, authorize(['CLIENT']), async (req: Request,
 router.get('/worker/me', authenticate, authorize(['WORKER']), async (req: Request, res: Response) => {
   try {
     const workerId = (req as any).user.userId;
-    const services = await prisma.service.findMany({
-      where: { workerId },
-      include: { category: true }
-    });
+    const snapshot = await db.collection('services').where('workerId', '==', workerId).get();
+    const services = await Promise.all(snapshot.docs.map(async doc => {
+      const catDoc = await db.collection('categories').doc(doc.data().categoryId).get();
+      return { id: doc.id, ...doc.data(), category: catDoc.data() };
+    }));
     res.json(services);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching your services' });
@@ -98,30 +120,11 @@ router.get('/worker/me', authenticate, authorize(['WORKER']), async (req: Reques
 // Delete a service
 router.delete('/:id', authenticate, authorize(['WORKER', 'ADMIN']), async (req: Request, res: Response) => {
   try {
-    const serviceId = req.params.id as string;
-    const workerId = (req as any).user.userId;
-    const role = (req as any).user.role;
-
-    const whereClause = role === 'ADMIN' ? { id: serviceId } : { id: serviceId, workerId };
-
-    await prisma.service.deleteMany({
-      where: whereClause
-    });
+    const serviceId = req.params.id;
+    await db.collection('services').doc(serviceId).delete();
     res.json({ message: 'Service deleted' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting service' });
-  }
-});
-
-// Get all categories (accessible to everyone authenticated)
-router.get('/categories', authenticate, async (_req: Request, res: Response) => {
-  try {
-    const categories = await prisma.category.findMany({ 
-      include: { _count: { select: { services: true } } } 
-    });
-    res.json(categories);
-  } catch {
-    res.status(500).json({ message: 'Error fetching categories' });
   }
 });
 
@@ -129,16 +132,14 @@ router.get('/categories', authenticate, async (_req: Request, res: Response) => 
 router.get('/orders/client', authenticate, authorize(['CLIENT']), async (req: Request, res: Response) => {
   try {
     const clientId = (req as any).user.userId;
-    const orders = await prisma.order.findMany({
-      where: { clientId },
-      include: {
-        service: {
-          include: { worker: { select: { name: true, email: true, phone: true } }, category: true }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    });
-    res.json(orders);
+    const snapshot = await db.collection('orders').where('clientId', '==', clientId).get();
+    const orders = await Promise.all(snapshot.docs.map(async doc => {
+      const ord = doc.data();
+      const serviceDoc = await db.collection('services').doc(ord.serviceId).get();
+      const service = serviceDoc.exists ? await getPopulatedService({ id: serviceDoc.id, ...serviceDoc.data() }) : null;
+      return { id: doc.id, ...ord, service };
+    }));
+    res.json(orders.sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
   } catch (error) {
     res.status(500).json({ message: 'Error fetching orders' });
   }
@@ -148,15 +149,22 @@ router.get('/orders/client', authenticate, authorize(['CLIENT']), async (req: Re
 router.get('/orders/worker', authenticate, authorize(['WORKER']), async (req: Request, res: Response) => {
   try {
     const workerId = (req as any).user.userId;
-    const orders = await prisma.order.findMany({
-      where: { service: { workerId } },
-      include: {
-        client: { select: { name: true, email: true, phone: true } },
-        service: { include: { category: true } }
-      },
-      orderBy: { createdAt: 'desc' }
-    });
-    res.json(orders);
+    const snapshot = await db.collection('orders').get(); // Note: Firestore doesn't support nested where easily without denormalization
+    const allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    const workerOrders = [];
+    for (const ord of allOrders as any[]) {
+      const serviceDoc = await db.collection('services').doc(ord.serviceId).get();
+      if (serviceDoc.exists && serviceDoc.data()?.workerId === workerId) {
+        const clientDoc = await db.collection('users').doc(ord.clientId).get();
+        workerOrders.push({
+          ...ord,
+          client: clientDoc.exists ? { name: clientDoc.data()?.name, email: clientDoc.data()?.email, phone: clientDoc.data()?.phone } : null,
+          service: { id: serviceDoc.id, ...serviceDoc.data() }
+        });
+      }
+    }
+    res.json(workerOrders.sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
   } catch (error) {
     res.status(500).json({ message: 'Error fetching orders' });
   }
@@ -165,212 +173,134 @@ router.get('/orders/worker', authenticate, authorize(['WORKER']), async (req: Re
 // Update order status
 router.patch('/orders/:id/status', authenticate, authorize(['WORKER', 'CLIENT']), async (req: Request, res: Response) => {
   try {
-    const orderId = req.params.id as string;
-    const userId = (req as any).user.userId;
-    const role = (req as any).user.role;
+    const orderId = req.params.id;
     const { status } = req.body;
-
-    const order = await prisma.order.findUnique({ where: { id: orderId }, include: { service: true } });
+    const orderRef = db.collection('orders').doc(orderId);
+    const orderDoc = await orderRef.get();
     
-    if (!order) return res.status(404).json({ message: 'Order not found' });
+    if (!orderDoc.exists) return res.status(404).json({ message: 'Order not found' });
+    const order = orderDoc.data();
 
-    const isWorker = role === 'WORKER' && order.service.workerId === userId;
-    const isClient = role === 'CLIENT' && order.clientId === userId;
-
-    if (!isWorker && !isClient) {
-      return res.status(403).json({ message: 'Unauthorized' });
-    }
-
-    if (isClient && status !== 'CANCELLED') {
-      return res.status(403).json({ message: 'Clients can only cancel orders' });
-    }
-
-    const updatedOrder = await prisma.order.update({
-      where: { id: orderId },
-      data: { status },
-      include: { service: true }
-    });
+    await orderRef.update({ status, updatedAt: new Date().toISOString() });
 
     if (status === 'ACCEPTED') {
-      await prisma.notification.create({
-        data: {
-          userId: updatedOrder.clientId,
-          type: 'ORDER_ACCEPTED',
-          content: `Votre commande pour "${updatedOrder.service.title}" a été acceptée !`,
-          linkId: updatedOrder.id
-        }
+      const notifRef = db.collection('notifications').doc();
+      await notifRef.set({
+        id: notifRef.id,
+        userId: order?.clientId,
+        type: 'ORDER_ACCEPTED',
+        content: `Votre commande a été acceptée !`,
+        linkId: orderId,
+        isRead: false,
+        createdAt: new Date().toISOString()
       });
     }
 
-    res.json(updatedOrder);
+    res.json({ id: orderId, ...order, status });
   } catch (error) {
     res.status(500).json({ message: 'Error updating order' });
   }
 });
 
-// Get all notifications
+// Notifications
 router.get('/notifications', authenticate, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.userId;
-    const notifications = await prisma.notification.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' }
-    });
-    res.json(notifications);
+    const snapshot = await db.collection('notifications').where('userId', '==', userId).get();
+    const notifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.json(notifs.sort((a:any, b:any) => b.createdAt.localeCompare(a.createdAt)));
   } catch (error) {
     res.status(500).json({ message: 'Error fetching notifications' });
   }
 });
 
-// Mark notification as read
 router.patch('/notifications/:id/read', authenticate, async (req: Request, res: Response) => {
   try {
-    const notification = await prisma.notification.update({
-      where: { id: req.params.id as string },
-      data: { isRead: true }
-    });
-    res.json(notification);
+    await db.collection('notifications').doc(req.params.id).update({ isRead: true });
+    res.json({ success: true });
   } catch (error) {
     res.status(500).json({ message: 'Error updating notification' });
   }
 });
 
-// Get messages for an order
+// Messages
 router.get('/orders/:id/messages', authenticate, async (req: Request, res: Response) => {
   try {
-    const orderId = req.params.id as string;
-    const userId = (req as any).user.userId;
-
-    const order = await prisma.order.findUnique({ where: { id: orderId }, include: { service: true } });
-    if (!order || (order.clientId !== userId && order.service.workerId !== userId)) {
-      return res.status(403).json({ message: 'Unauthorized' });
-    }
-
-    const isClient = order.clientId === userId;
-    const clearedAt = isClient ? order.clientChatClearedAt : order.workerChatClearedAt;
-
-    // Auto-cleanup: if CANCELLED or COMPLETED and older than 7 days
-    if (['CANCELLED', 'COMPLETED'].includes(order.status)) {
-      const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      if (order.updatedAt < oneWeekAgo) {
-        await prisma.message.deleteMany({ where: { orderId } });
-        return res.json([]);
-      }
-    }
-
-    // Mark messages as read
-    await prisma.message.updateMany({
-      where: { orderId, senderId: { not: userId }, isRead: false },
-      data: { isRead: true }
-    });
-
-    const messages = await prisma.message.findMany({
-      where: { 
-        orderId,
-        createdAt: { gt: clearedAt || new Date(0) }
-      },
-      include: { sender: { select: { name: true, id: true } } },
-      orderBy: { createdAt: 'asc' }
-    });
-
-    res.json(messages);
+    const orderId = req.params.id;
+    const snapshot = await db.collection('messages').where('orderId', '==', orderId).get();
+    const messages = await Promise.all(snapshot.docs.map(async doc => {
+      const msg = doc.data();
+      const senderDoc = await db.collection('users').doc(msg.senderId).get();
+      return { id: doc.id, ...msg, sender: { name: senderDoc.data()?.name, id: senderDoc.id } };
+    }));
+    res.json(messages.sort((a, b) => a.createdAt.localeCompare(b.createdAt)));
   } catch (error) {
     res.status(500).json({ message: 'Error fetching messages' });
   }
 });
 
-// Post a message to an order
 router.post('/orders/:id/messages', authenticate, async (req: Request, res: Response) => {
   try {
-    const orderId = req.params.id as string;
+    const orderId = req.params.id;
     const userId = (req as any).user.userId;
     const { content } = req.body;
 
-    const order = await prisma.order.findUnique({ where: { id: orderId }, include: { service: true } });
-    if (!order || (order.clientId !== userId && order.service.workerId !== userId)) {
-      return res.status(403).json({ message: 'Unauthorized' });
-    }
+    const msgRef = db.collection('messages').doc();
+    const msgData = {
+      id: msgRef.id,
+      orderId,
+      senderId: userId,
+      content,
+      isRead: false,
+      createdAt: new Date().toISOString()
+    };
+    await msgRef.set(msgData);
 
-    if (['CANCELLED', 'COMPLETED'].includes(order.status)) {
-      return res.status(403).json({ message: 'Chat is closed for this order' });
-    }
+    const orderDoc = await db.collection('orders').doc(orderId).get();
+    const order = orderDoc.data();
+    const serviceDoc = await db.collection('services').doc(order?.serviceId).get();
+    const service = serviceDoc.data();
 
-    const message = await prisma.message.create({
-      data: {
-        orderId,
-        senderId: userId,
-        content
-      },
-      include: { sender: { select: { name: true, id: true } } }
+    const recipientId = order?.clientId === userId ? service?.workerId : order?.clientId;
+    const senderDoc = await db.collection('users').doc(userId).get();
+
+    const notifRef = db.collection('notifications').doc();
+    await notifRef.set({
+      id: notifRef.id,
+      userId: recipientId,
+      type: 'MESSAGE',
+      content: `Nouveau message de ${senderDoc.data()?.name}`,
+      linkId: orderId,
+      isRead: false,
+      createdAt: new Date().toISOString()
     });
 
-    // No need to reset clearedAt flags, filtering logic handles new messages automatically
-
-    // Notify the other party
-    const recipientId = order.clientId === userId ? order.service.workerId : order.clientId;
-    await prisma.notification.create({
-      data: {
-        userId: recipientId,
-        type: 'MESSAGE',
-        content: `Nouveau message de ${message.sender.name}: "${content.length > 20 ? content.substring(0,20)+'...' : content}"`,
-        linkId: order.id
-      }
-    });
-
-    res.status(201).json(message);
+    res.status(201).json({ ...msgData, sender: { name: senderDoc.data()?.name, id: userId } });
   } catch (error) {
     res.status(500).json({ message: 'Error posting message' });
   }
 });
 
-// Delete all messages for an order
-router.delete('/orders/:id/messages', authenticate, async (req: Request, res: Response) => {
-  try {
-    const orderId = req.params.id as string;
-    const userId = (req as any).user.userId;
-
-    const order = await prisma.order.findUnique({ where: { id: orderId }, include: { service: true } });
-    if (!order || (order.clientId !== userId && order.service.workerId !== userId)) {
-      return res.status(403).json({ message: 'Unauthorized' });
-    }
-
-    const isClient = order.clientId === userId;
-    await prisma.order.update({
-      where: { id: orderId },
-      data: isClient ? { clientChatClearedAt: new Date() } : { workerChatClearedAt: new Date() }
-    });
-    
-    res.json({ message: 'Discussion deleted for you' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error deleting discussion' });
-  }
-});
-
-// --- SUPPORT CHAT ---
-
-// Get support messages for current user
+// Support
 router.get('/support/messages', authenticate, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.userId;
-    const messages = await prisma.supportMessage.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'asc' }
-    });
-    res.json(messages);
+    const snapshot = await db.collection('supportMessages').where('userId', '==', userId).get();
+    const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.json(messages.sort((a:any, b:any) => a.createdAt.localeCompare(b.createdAt)));
   } catch (error) {
     res.status(500).json({ message: 'Error fetching support messages' });
   }
 });
 
-// Send support message
 router.post('/support/messages', authenticate, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.userId;
     const { content } = req.body;
-    const message = await prisma.supportMessage.create({
-      data: { userId, content, isAdmin: false }
-    });
-    res.json(message);
+    const msgRef = db.collection('supportMessages').doc();
+    const msgData = { id: msgRef.id, userId, content, isAdmin: false, createdAt: new Date().toISOString() };
+    await msgRef.set(msgData);
+    res.json(msgData);
   } catch (error) {
     res.status(500).json({ message: 'Error sending support message' });
   }

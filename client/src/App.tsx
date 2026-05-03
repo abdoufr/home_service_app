@@ -104,7 +104,7 @@ function App() {
   }, [lang]);
 
   React.useEffect(() => {
-    fetch('http://localhost:3000/api/auth/me', { credentials: 'include' })
+    fetch('/api/auth/me', { credentials: 'include' })
       .then(res => {
         if (res.ok) return res.json();
         throw new Error('Not logged in');
@@ -120,7 +120,7 @@ function App() {
     if (!user) return;
     const fetchNotifications = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/services/notifications', { credentials: 'include' });
+        const res = await fetch('/api/services/notifications', { credentials: 'include' });
         if (res.ok) {
           const data = await res.json();
           setNotifications(prev => {
@@ -145,7 +145,7 @@ function App() {
 
   const handleNotificationClick = async (n: any) => {
     if (!n.isRead) {
-      await fetch(`http://localhost:3000/api/services/notifications/${n.id}/read`, { method: 'PATCH', credentials: 'include' });
+      await fetch(`/api/services/notifications/${n.id}/read`, { method: 'PATCH', credentials: 'include' });
       setNotifications(notifications.map(x => x.id === n.id ? { ...x, isRead: true } : x));
     }
     setShowNotifications(false);

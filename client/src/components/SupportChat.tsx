@@ -18,8 +18,8 @@ export default function SupportChat({ onClose, isAdmin, targetUserId, t, lang }:
   
   const fetchMessages = async () => {
     const url = isAdmin && targetUserId 
-      ? `http://localhost:3000/api/admin/support/messages/${targetUserId}`
-      : `http://localhost:3000/api/services/support/messages`;
+      ? `/api/admin/support/messages/${targetUserId}`
+      : `/api/services/support/messages`;
       
     try {
       const res = await fetch(url, { credentials: 'include' });
@@ -42,8 +42,8 @@ export default function SupportChat({ onClose, isAdmin, targetUserId, t, lang }:
     if (!content.trim()) return;
     
     const url = isAdmin && targetUserId
-      ? `http://localhost:3000/api/admin/support/messages/${targetUserId}`
-      : `http://localhost:3000/api/services/support/messages`;
+      ? `/api/admin/support/messages/${targetUserId}`
+      : `/api/services/support/messages`;
 
     try {
       const res = await fetch(url, {
