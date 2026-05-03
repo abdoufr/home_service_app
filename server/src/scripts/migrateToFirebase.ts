@@ -3,23 +3,24 @@ import admin from 'firebase-admin';
 import * as dotenv from 'dotenv';
 import path from 'path';
 
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
+
 dotenv.config();
 
 // Initialize Firebase Admin (using local service account for migration)
 // Make sure to have your serviceAccountKey.json in the root or set ENV vars
 if (!admin.apps.length) {
-  const serviceAccountPath = path.join(__dirname, '../../serviceAccountKey.json');
   try {
     admin.initializeApp({
-      credential: admin.credential.applicationDefault(), // Or path to your key
+      credential: admin.credential.applicationDefault(), // Uses GOOGLE_APPLICATION_CREDENTIALS or ENV vars
     });
   } catch (e) {
-    console.error("Please provide Firebase credentials (ENV or serviceAccountKey.json)");
-    process.exit(1);
+    console.error("Please provide Firebase credentials in .env");
   }
 }
 
-const prisma = new PrismaClient();
+const adapter = new PrismaBetterSqlite3({ url: 'file:./dev.db' });
+const prisma = new PrismaClient({ adapter });
 const db = admin.firestore();
 
 async function migrate() {
