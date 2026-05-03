@@ -1,0 +1,102 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  role      String   // "ADMIN", "WORKER", "CLIENT"
+  approved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  servicesOffered Service[] @relation("WorkerServices")
+  ordersPlaced    Order[]   @relation("ClientOrders")
+  messagesSent    Message[] @relation("SentMessages")
+  supportMessages SupportMessage[] @relation("UserSupportMessages")
+  notifications   Notification[] @relation("UserNotifications")
+}
+
+// ... existing models ...
+
+model SupportMessage {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation("UserSupportMessages", fields: [userId], references: [id], onDelete: Cascade)
+  isAdmin   Boolean  @default(false)
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  price       Float
+  workerId    String
+  worker      User     @relation("WorkerServices", fields: [workerId], references: [id])
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  orders      Order[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  services  Service[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Order {
+  id        String   @id @default(uuid())
+  clientId  String
+  client    User     @relation("ClientOrders", fields: [clientId], references: [id])
+  serviceId String
+  service   Service  @relation(fields: [serviceId], references: [id])
+  status    String   @default("PENDING") // PENDING, ACCEPTED, COMPLETED, CANCELLED
+  scheduledAt DateTime?
+  clientChatClearedAt DateTime?
+  workerChatClearedAt DateTime?
+  messages  Message[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation("SentMessages", fields: [senderId], references: [id])
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Settings {
+  id                 String  @id @default(uuid())
+  autoApproveUsers   Boolean @default(true)
+  autoApproveWorkers Boolean @default(false)
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // MESSAGE, NEW_ORDER, ORDER_ACCEPTED
+  content   String
+  linkId    String?  // ID of the order or relevant entity
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

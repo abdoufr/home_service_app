@@ -1,0 +1,7 @@
+🔑 Pour activer Google OAuth (Gmail)
+Allez sur console.cloud.google.com
+Créez un projet → APIs & Services → Credentials → OAuth 2.0 Client ID
+Ajoutez l'URI de redirection : http://localhost:3000/api/auth/google/callback
+Copiez le Client ID et Client Secret dans votre fichier .env :
+GOOGLE_CLIENT_ID=votre-vrai-id-ici
+GOOGLE_CLIENT_SECRET=votre-vrai-secret-ici
