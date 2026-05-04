@@ -9,14 +9,22 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-// Firebase is automatically initialized via server/src/config/firebase.ts on import
+let startupError: any = null;
+let authRoutes: any = null;
+let serviceRoutes: any = null;
+let adminRoutes: any = null;
 
-import authRoutes from '../server/src/routes/auth.js';
-import serviceRoutes from '../server/src/routes/services.js';
-import adminRoutes from '../server/src/routes/admin.js';
+try {
+  // Firebase is automatically initialized via server/src/config/firebase.ts on import
+  // We use dynamic imports to catch any top-level execution errors in these files
+  authRoutes = (await import('../server/src/routes/auth.js')).default;
+  serviceRoutes = (await import('../server/src/routes/services.js')).default;
+  adminRoutes = (await import('../server/src/routes/admin.js')).default;
+} catch (e: any) {
+  startupError = e;
+  console.error("CRITICAL STARTUP ERROR:", e);
+}
 
 const app = express();
 
@@ -28,12 +36,16 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-app.use('/api/auth', authRoutes);
-app.use('/api/services', serviceRoutes);
-app.use('/api/admin', adminRoutes);
+if (authRoutes) app.use('/api/auth', authRoutes);
+if (serviceRoutes) app.use('/api/services', serviceRoutes);
+if (adminRoutes) app.use('/api/admin', adminRoutes);
 
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', database: 'firebase' });
+  if (startupError) {
+    res.status(500).json({ status: 'error', error: startupError.toString(), stack: startupError.stack });
+  } else {
+    res.json({ status: 'ok', database: 'firebase' });
+  }
 });
 
 export default app;
