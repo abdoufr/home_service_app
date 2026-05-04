@@ -2,6 +2,12 @@ import admin from 'firebase-admin';
 
 import path from 'path';
 
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // FIX: Shift time by -1 hour to match Google's UTC servers (avoids invalid_grant)
 const originalDateNow = Date.now;
 Date.now = () => originalDateNow() - 3600 * 1000;
@@ -9,8 +15,9 @@ Date.now = () => originalDateNow() - 3600 * 1000;
 if (!admin.apps.length) {
   try {
     const serviceAccountPath = path.join(__dirname, '../../serviceAccountKey.json');
+    const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
     admin.initializeApp({
-      credential: admin.credential.cert(require(serviceAccountPath)),
+      credential: admin.credential.cert(serviceAccount),
     });
     console.log('✅ Firebase Admin Initialized via serviceAccountKey.json');
   } catch (error) {

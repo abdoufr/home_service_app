@@ -12,30 +12,7 @@ import cookieParser from 'cookie-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Initialize Firebase before importing routes
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Dynamic firebase-admin import with serviceAccountKey.json fallback
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const admin = require('firebase-admin');
-
-if (!admin.apps.length) {
-  try {
-    const keyPath = path.join(__dirname, '../server/serviceAccountKey.json');
-    admin.initializeApp({ credential: admin.credential.cert(require(keyPath)) });
-  } catch {
-    // Production: use env vars
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      } as any),
-    });
-  }
-}
+// Firebase is automatically initialized via server/src/config/firebase.ts on import
 
 import authRoutes from '../server/src/routes/auth.js';
 import serviceRoutes from '../server/src/routes/services.js';
