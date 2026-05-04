@@ -6,16 +6,8 @@
       "destination": "/server/src/index.ts"
     },
     {
-      "source": "/([^/]+\\.[^/]+)$",
-      "destination": "/client/dist/$1"
-    },
-    {
-      "source": "/assets/(.*)",
-      "destination": "/client/dist/assets/$1"
-    },
-    {
       "source": "/(.*)",
-      "destination": "/client/dist/index.html"
+      "destination": "/index.html"
     }
   ],
   "builds": [
