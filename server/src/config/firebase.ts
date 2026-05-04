@@ -8,10 +8,6 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// FIX: Shift time by -1 hour to match Google's UTC servers (avoids invalid_grant)
-const originalDateNow = Date.now;
-Date.now = () => originalDateNow() - 3600 * 1000;
-
 if (!admin.apps.length) {
   try {
     const serviceAccountPath = path.join(__dirname, '../../serviceAccountKey.json');
