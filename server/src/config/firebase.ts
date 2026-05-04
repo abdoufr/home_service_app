@@ -23,10 +23,16 @@ if (!admin.apps.length) {
   } catch (error) {
     console.log('ℹ️ serviceAccountKey.json not found, using ENV variables');
     try {
+      let pk = process.env.FIREBASE_PRIVATE_KEY || '';
+      if ((pk.startsWith('"') && pk.endsWith('"')) || (pk.startsWith("'") && pk.endsWith("'"))) {
+        pk = pk.substring(1, pk.length - 1);
+      }
+      pk = pk.replace(/\\n/g, '\n');
+
       const serviceAccount = {
         projectId: process.env.FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        privateKey: pk,
       };
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),

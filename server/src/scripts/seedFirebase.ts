@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 import * as dotenv from 'dotenv';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 // FIX: Shift time by -1 hour to match Google's UTC servers (avoids invalid_grant)
 const originalDateNow = Date.now;
