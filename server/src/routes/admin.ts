@@ -27,7 +27,7 @@ router.get('/users', async (req: Request, res: Response) => {
 // Approve user
 router.patch('/users/:id/approve', async (req: Request, res: Response) => {
   try {
-    await db.collection('users').doc(req.params.id).update({ approved: true });
+    await db.collection('users').doc(req.params.id as string).update({ approved: true });
     res.json({ message: 'User approved' });
   } catch (error) {
     res.status(404).json({ message: 'User not found' });
@@ -37,7 +37,7 @@ router.patch('/users/:id/approve', async (req: Request, res: Response) => {
 // Delete user
 router.delete('/users/:id', async (req: Request, res: Response) => {
   try {
-    await db.collection('users').doc(req.params.id).delete();
+    await db.collection('users').doc(req.params.id as string).delete();
     res.json({ message: 'User deleted' });
   } catch (error) {
     res.status(404).json({ message: 'User not found' });
@@ -110,7 +110,7 @@ router.post('/categories', async (req: Request, res: Response) => {
 
 router.delete('/categories/:id', async (req: Request, res: Response) => {
   try {
-    await db.collection('categories').doc(req.params.id).delete();
+    await db.collection('categories').doc(req.params.id as string).delete();
     res.json({ message: 'Category deleted' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting category' });

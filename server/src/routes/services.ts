@@ -120,7 +120,7 @@ router.get('/worker/me', authenticate, authorize(['WORKER']), async (req: Reques
 // Delete a service
 router.delete('/:id', authenticate, authorize(['WORKER', 'ADMIN']), async (req: Request, res: Response) => {
   try {
-    const serviceId = req.params.id;
+    const serviceId = req.params.id as string;
     await db.collection('services').doc(serviceId).delete();
     res.json({ message: 'Service deleted' });
   } catch (error) {
@@ -139,7 +139,7 @@ router.get('/orders/client', authenticate, authorize(['CLIENT']), async (req: Re
       const service = serviceDoc.exists ? await getPopulatedService({ id: serviceDoc.id, ...serviceDoc.data() }) : null;
       return { id: doc.id, ...ord, service };
     }));
-    res.json(orders.sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
+    res.json(orders.sort((a: any, b: any) => (b.createdAt||'').localeCompare(a.createdAt||'')));
   } catch (error) {
     res.status(500).json({ message: 'Error fetching orders' });
   }
@@ -234,7 +234,7 @@ router.get('/orders/:id/messages', authenticate, async (req: Request, res: Respo
       const senderDoc = await db.collection('users').doc(msg.senderId).get();
       return { id: doc.id, ...msg, sender: { name: senderDoc.data()?.name, id: senderDoc.id } };
     }));
-    res.json(messages.sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()));
+    res.json(messages.sort((a: any, b: any) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()));
   } catch (error) {
     res.status(500).json({ message: 'Error fetching messages' });
   }
@@ -242,7 +242,7 @@ router.get('/orders/:id/messages', authenticate, async (req: Request, res: Respo
 
 router.post('/orders/:id/messages', authenticate, async (req: Request, res: Response) => {
   try {
-    const orderId = req.params.id;
+    const orderId = req.params.id as string;
     const userId = (req as any).user.userId;
     const { content } = req.body;
 
