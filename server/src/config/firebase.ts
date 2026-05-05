@@ -8,6 +8,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+export let firebaseInitError: string | null = null;
+
 if (!admin.apps.length) {
   try {
     const serviceAccountPath = path.join(__dirname, '../../serviceAccountKey.json');
@@ -33,11 +35,12 @@ if (!admin.apps.length) {
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
       });
-    } catch (e) {
+    } catch (e: any) {
       console.error('❌ Firebase Admin Initialization Error:', e);
+      firebaseInitError = e.message;
     }
   }
 }
 
-export const db = admin.firestore();
-export const auth = admin.auth();
+export const db = admin.apps.length ? admin.firestore() : null as any;
+export const auth = admin.apps.length ? admin.auth() : null as any;
