@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, User, ShieldCheck, ArrowRight, Loader2, Briefcase, Users, Shield } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, ShieldCheck, ArrowRight, Loader2, Briefcase, Users, Shield, MapPin } from 'lucide-react';
+import MapPicker from '../components/MapPicker.js';
 
 interface RegisterPageProps {
   onLogin: (user: { id: string; role: string; name: string; email: string }) => void;
@@ -22,6 +23,8 @@ export default function RegisterPage({ onLogin }: RegisterPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
   const navigate = useNavigate();
 
   const handleGoogleLogin = () => {
@@ -48,7 +51,7 @@ export default function RegisterPage({ onLogin }: RegisterPageProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ name, email, password, phone, role }),
+        body: JSON.stringify({ name, email, password, phone, role, latitude, longitude }),
       });
 
       const data = await res.json();
@@ -250,6 +253,14 @@ export default function RegisterPage({ onLogin }: RegisterPageProps) {
                     required
                   />
                 </div>
+              </div>
+
+              <div className="input-group">
+                <label><MapPin size={16} /> Votre localisation (optionnel)</label>
+                <MapPicker onLocationSelect={(lat, lng) => {
+                  setLatitude(lat);
+                  setLongitude(lng);
+                }} />
               </div>
 
               <div style={{ display: 'flex', gap: '0.75rem' }}>

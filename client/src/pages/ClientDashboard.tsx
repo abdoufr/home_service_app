@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
-import { ShoppingBag, Briefcase, MessageCircle, Search, Clock, MapPin, Star, Filter, ArrowRight, Trash2, User } from 'lucide-react';
+import { ShoppingBag, Briefcase, MessageCircle, Search, Clock, MapPin, Star, Filter, ArrowRight, Trash2, User, Map as MapIcon } from 'lucide-react';
 import ChatModal from '../components/ChatModal';
+import WorkerMap from '../components/WorkerMap.js';
 
 export default function ClientDashboard({ userId, t, lang }: { userId: string, t: any, lang: string }) {
   const [services, setServices] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'explore' | 'orders' | 'chat'>('explore');
+  const [activeTab, setActiveTab] = useState<'explore' | 'orders' | 'chat' | 'map'>('explore');
+  const [workers, setWorkers] = useState<any[]>([]);
+  const [clientProfile, setClientProfile] = useState<any>(null);
   const [selectedCat, setSelectedCat] = useState('');
   const [orderDates, setOrderDates] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,14 +30,18 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
 
   const fetchAll = async () => {
     try {
-      const [srvRes, ordRes, catRes] = await Promise.all([
+      const [srvRes, ordRes, catRes, workRes, meRes] = await Promise.all([
         fetch('/api/services', { credentials: 'include' }),
         fetch('/api/services/orders/client', { credentials: 'include' }),
-        fetch('/api/services/categories', { credentials: 'include' })
+        fetch('/api/services/categories', { credentials: 'include' }),
+        fetch('/api/services/workers', { credentials: 'include' }),
+        fetch('/api/auth/me', { credentials: 'include' })
       ]);
       setServices(srvRes.ok ? await srvRes.json() : []);
       setOrders(ordRes.ok ? await ordRes.json() : []);
       setCategories(catRes.ok ? await catRes.json() : []);
+      setWorkers(workRes.ok ? await workRes.json() : []);
+      setClientProfile(meRes.ok ? await meRes.json() : null);
     } catch (e) {
       console.error(e);
     } finally {
@@ -122,6 +129,9 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
         </button>
         <button className={`btn ${activeTab === 'chat' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('chat')} style={{ padding: '0.6rem 2rem' }}>
           {t.chat}
+        </button>
+        <button className={`btn ${activeTab === 'map' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('map')} style={{ padding: '0.6rem 2rem' }}>
+          <MapIcon size={18} style={{ marginRight: '8px' }} /> {lang === 'ar' ? 'الخريطة' : 'Carte'}
         </button>
       </div>
 
@@ -258,6 +268,20 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'map' && (
+        <div className="animate-fade-in">
+          <div className="glass-panel" style={{ padding: '1rem', marginBottom: '1.5rem' }}>
+            <h2 style={{ marginBottom: '1rem' }}>
+              {lang === 'ar' ? 'العاملين القريبين منك' : 'Prestataires à proximité'}
+            </h2>
+            <WorkerMap 
+              workers={workers} 
+              clientLocation={clientProfile?.latitude ? { lat: clientProfile.latitude, lng: clientProfile.longitude } : null} 
+            />
           </div>
         </div>
       )}

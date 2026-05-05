@@ -5,6 +5,31 @@ import admin from 'firebase-admin';
 
 const router = Router();
 
+// Get all workers (for map)
+router.get('/workers', authenticate, async (req: Request, res: Response) => {
+  try {
+    const snapshot = await db.collection('users')
+      .where('role', '==', 'WORKER')
+      .where('approved', '==', true)
+      .get();
+    
+    const workers = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        name: data.name,
+        phone: data.phone,
+        latitude: data.latitude,
+        longitude: data.longitude
+      };
+    }).filter(w => w.latitude && w.longitude); // Only return workers with locations
+
+    res.json(workers);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching workers' });
+  }
+});
+
 // Helper to get nested data (simulating joins)
 const getPopulatedService = async (srv: any) => {
   const workerDoc = await db.collection('users').doc(srv.workerId).get();

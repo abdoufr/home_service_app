@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Briefcase, ClipboardList, MessageCircle, Clock, CheckCircle, XCircle, TrendingUp, AlertCircle, User } from 'lucide-react';
+import { Plus, Trash2, Briefcase, ClipboardList, MessageCircle, Clock, CheckCircle, XCircle, TrendingUp, AlertCircle, User, MapPin } from 'lucide-react';
 import ChatModal from '../components/ChatModal';
+import MapPicker from '../components/MapPicker.js';
 
 export default function WorkerDashboard({ userId, t, lang }: { userId: string, t: any, lang: string }) {
   const [services, setServices] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'orders' | 'services' | 'chat'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'services' | 'chat' | 'location'>('orders');
+  const [profile, setProfile] = useState<any>(null);
   
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
@@ -34,11 +36,13 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
       const [srvRes, ordRes, catRes] = await Promise.all([
         fetch('/api/services/worker/me', { credentials: 'include' }),
         fetch('/api/services/orders/worker', { credentials: 'include' }),
-        fetch('/api/services/categories', { credentials: 'include' })
+        fetch('/api/services/categories', { credentials: 'include' }),
+        fetch('/api/auth/me', { credentials: 'include' })
       ]);
       setServices(srvRes.ok ? await srvRes.json() : []);
       setOrders(ordRes.ok ? await ordRes.json() : []);
       setCategories(catRes.ok ? await catRes.json() : []);
+      setProfile(meRes.ok ? await meRes.json() : null);
     } catch (e) {} finally {
       setLoading(false);
     }
@@ -85,6 +89,24 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
     if (res.ok) fetchAll();
   };
 
+  const handleUpdateLocation = async (lat: number, lng: number) => {
+    try {
+      const res = await fetch('/api/auth/profile/location', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ latitude: lat, longitude: lng })
+      });
+      if (res.ok) {
+        setMsg(lang === 'ar' ? '✅ تم تحديث الموقع!' : '✅ Localisation mise à jour !');
+        fetchAll();
+        setTimeout(() => setMsg(''), 3000);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const activeOrder = orders.find(o => o.id === activeChat);
 
   if (loading) return (
@@ -127,6 +149,9 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
         </button>
         <button className={`btn ${activeTab === 'chat' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('chat')} style={{ padding: '0.6rem 1.5rem' }}>
           {t.chat}
+        </button>
+        <button className={`btn ${activeTab === 'location' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('location')} style={{ padding: '0.6rem 1.5rem' }}>
+          <MapPin size={18} style={{ marginRight: '8px' }} /> {lang === 'ar' ? 'موقعي' : 'Ma Position'}
         </button>
       </div>
 
@@ -284,6 +309,23 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
         </div>
       )}
 
+      {activeTab === 'location' && (
+        <div className="animate-fade-in">
+          <div className="glass-panel" style={{ padding: '2rem' }}>
+            <h3 style={{ marginBottom: '1.5rem', fontWeight: '800' }}>
+              {lang === 'ar' ? 'تحديد موقع عملك' : 'Définir votre zone de travail'}
+            </h3>
+            <p style={{ marginBottom: '1.5rem', color: 'var(--text-muted)' }}>
+              {lang === 'ar' ? 'سيتمكن الزبائن من رؤيتك على الخريطة.' : 'Les clients pourront vous voir sur la carte.'}
+            </p>
+            <MapPicker 
+              initialLocation={profile?.latitude ? { lat: profile.latitude, lng: profile.longitude } : undefined}
+              onLocationSelect={handleUpdateLocation} 
+            />
+          </div>
+        </div>
+      )}
+      
       {activeTab === 'chat' && (
         <div className="chat-tab-section animate-fade-in">
           <div className="adaptive-grid">

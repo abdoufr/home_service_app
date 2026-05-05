@@ -9,7 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-for-jwt-12345';
 
 router.post('/register', async (req: Request, res: Response) => {
   try {
-    const { email, password, name, phone, role } = req.body;
+    const { email, password, name, phone, role, latitude, longitude } = req.body;
 
     if (!['ADMIN', 'WORKER', 'CLIENT'].includes(role)) {
       return res.status(400).json({ message: 'Invalid role' });
@@ -40,6 +40,8 @@ router.post('/register', async (req: Request, res: Response) => {
       phone,
       role,
       approved,
+      latitude: latitude || null,
+      longitude: longitude || null,
       createdAt: new Date().toISOString()
     };
 
@@ -91,6 +93,22 @@ router.post('/logout', (req: Request, res: Response) => {
   res.json({ message: 'Logged out successfully' });
 });
 
+router.patch('/profile/location', authenticate, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { latitude, longitude } = req.body;
+    
+    await db.collection('users').doc(userId).update({
+      latitude,
+      longitude
+    });
+    
+    res.json({ message: 'Location updated' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating location' });
+  }
+});
+
 router.get('/me', authenticate, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.userId;
@@ -101,7 +119,15 @@ router.get('/me', authenticate, async (req: Request, res: Response) => {
     }
 
     const user = userDoc.data();
-    res.json({ id: user?.id, email: user?.email, name: user?.name, role: user?.role, approved: user?.approved });
+    res.json({ 
+      id: user?.id, 
+      email: user?.email, 
+      name: user?.name, 
+      role: user?.role, 
+      approved: user?.approved,
+      latitude: user?.latitude,
+      longitude: user?.longitude
+    });
   } catch (error) {
     res.status(500).json({ message: 'Internal server error' });
   }
