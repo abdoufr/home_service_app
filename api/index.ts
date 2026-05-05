@@ -11,7 +11,13 @@ import authRoutes from '../server/src/routes/auth.js';
 import serviceRoutes from '../server/src/routes/services.js';
 import adminRoutes from '../server/src/routes/admin.js';
 
-import { firebaseInitError } from '../server/src/config/firebase.js';
+let firebaseInitError: string | null = null;
+try {
+  const firebaseModule = await import('../server/src/config/firebase.js');
+  firebaseInitError = firebaseModule.firebaseInitError;
+} catch (e: any) {
+  firebaseInitError = `Module Load Error: ${e.message}`;
+}
 
 const app = express();
 
