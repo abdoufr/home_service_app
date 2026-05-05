@@ -33,7 +33,7 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
 
   const fetchAll = async () => {
     try {
-      const [srvRes, ordRes, catRes] = await Promise.all([
+      const [srvRes, ordRes, catRes, meRes] = await Promise.all([
         fetch('/api/services/worker/me', { credentials: 'include' }),
         fetch('/api/services/orders/worker', { credentials: 'include' }),
         fetch('/api/services/categories', { credentials: 'include' }),
