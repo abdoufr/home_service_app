@@ -1,6 +1,5 @@
-import express from 'express';
-const app = express();
-app.get('*', (req, res) => {
-  res.json({ message: 'Extremely simple test' });
-});
-export default app;
+export default function handler(request, response) {
+  response.status(200).json({
+    message: 'Standard Vercel Handler Works'
+  });
+}
