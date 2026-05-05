@@ -1,4 +1,6 @@
 import express from 'express';
 const app = express();
-app.get('/api/health', (_req, res) => res.json({ status: 'isolated-test-ok' }));
+app.get('*', (req, res) => {
+  res.json({ message: 'Extremely simple test' });
+});
 export default app;
