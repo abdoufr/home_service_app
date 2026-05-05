@@ -30,16 +30,7 @@ app.get('/api/health', (_req, res) => {
   if (firebaseInitError) {
     return res.status(500).json({ status: 'error', message: firebaseInitError });
   }
-  res.json({ 
-    status: 'ok', 
-    database: 'firebase',
-    env: {
-      hasProjectId: !!process.env.FIREBASE_PROJECT_ID,
-      hasClientEmail: !!process.env.FIREBASE_CLIENT_EMAIL,
-      hasPrivateKey: !!process.env.FIREBASE_PRIVATE_KEY,
-      hasJwtSecret: !!process.env.JWT_SECRET
-    }
-  });
+  res.json({ status: 'ok', database: 'firebase' });
 });
 
 export default app;
