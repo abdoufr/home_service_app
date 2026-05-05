@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { db } from '../config/firebase';
-import { authenticate, authorize } from '../middleware/auth';
+import { db } from '../config/firebase.js';
+import { authenticate, authorize } from '../middleware/auth.js';
 import admin from 'firebase-admin';
 
 const router = Router();
