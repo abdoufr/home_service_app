@@ -133,7 +133,7 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
         orderId={activeChat} 
         orderStatus={activeOrder?.status || 'PENDING'} 
         currentUserId={userId} 
-        recipientName={activeOrder?.client.name}
+        recipientName={activeOrder?.client?.name || 'Client'}
         onClose={() => setActiveChat(null)} 
         onDelete={fetchAll} 
         t={t} 
@@ -210,10 +210,10 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
                   <tr key={o.id}>
                     <td data-label="Client">
                       <div className="client-cell">
-                        <div className="avatar-small">{o.client.name[0]}</div>
+                        <div className="avatar-small">{o.client?.name?.[0] || '?'}</div>
                         <div>
-                          <strong>{o.client.name}</strong>
-                          {o.status === 'ACCEPTED' && <div className="phone-link">📞 {o.client.phone || 'N/A'}</div>}
+                          <strong>{o.client?.name || 'Inconnu'}</strong>
+                          {o.status === 'ACCEPTED' && <div className="phone-link">📞 {o.client?.phone || 'N/A'}</div>}
                         </div>
                       </div>
                     </td>
@@ -338,10 +338,10 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
             {chatOrders.map(o => (
               <div key={o.id} className="card chat-order-card" onClick={() => setActiveChat(o.id)} style={{ cursor: 'pointer' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div className="avatar-small" style={{ width: '48px', height: '48px', fontSize: '1.2rem' }}>{o.client.name[0]}</div>
+                  <div className="avatar-small" style={{ width: '48px', height: '48px', fontSize: '1.2rem' }}>{o.client?.name?.[0] || '?'}</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <strong style={{ fontSize: '1.1rem' }}>{o.client.name}</strong>
+                      <strong style={{ fontSize: '1.1rem' }}>{o.client?.name || 'Inconnu'}</strong>
                       <span className={`badge ${o.status === 'ACCEPTED' ? 'badge-auto' : 'badge-manual'}`} style={{ fontSize: '0.6rem' }}>{o.status}</span>
                     </div>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.2rem' }}>{o.service.title}</p>

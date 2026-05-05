@@ -96,7 +96,7 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
     const matchCat = selectedCat ? s.categoryId === selectedCat : true;
     const matchSearch = s.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                         s.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        s.worker.name.toLowerCase().includes(searchQuery.toLowerCase());
+                        s.worker?.name?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchCat && matchSearch;
   });
 
@@ -113,7 +113,7 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
         orderId={activeChat} 
         orderStatus={activeOrder?.status || 'PENDING'} 
         currentUserId={userId} 
-        recipientName={activeOrder?.service.worker.name}
+        recipientName={activeOrder?.service?.worker?.name || 'Prestataire'}
         onClose={() => setActiveChat(null)} 
         onDelete={fetchAll} 
         t={t} 
@@ -187,9 +187,9 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
                 <p className="service-desc">{s.description}</p>
                 
                 <div className="worker-mini-profile">
-                  <div className="avatar-small">{s.worker.name[0]}</div>
+                  <div className="avatar-small">{s.worker?.name?.[0] || '?'}</div>
                   <div>
-                    <span className="worker-name">{s.worker.name}</span>
+                    <span className="worker-name">{s.worker?.name || 'Inconnu'}</span>
                     <div className="price-tag">{s.price} <small>DZD</small></div>
                   </div>
                 </div>
