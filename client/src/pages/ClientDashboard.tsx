@@ -177,7 +177,7 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
             {filteredServices.map(s => (
               <div key={s.id} className="card service-card">
                 <div className="card-top">
-                  <span className="category-badge">{s.category.name}</span>
+                  <span className="category-badge">{s.category?.name || 'Service'}</span>
                   <div className="rating">
                     <Star size={14} fill="var(--accent)" color="var(--accent)" />
                     <span>4.9</span>
@@ -298,13 +298,13 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
             {chatOrders.map(o => (
               <div key={o.id} className="card chat-order-card" onClick={() => setActiveChat(o.id)} style={{ cursor: 'pointer' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div className="avatar-small" style={{ width: '48px', height: '48px', fontSize: '1.2rem' }}>{o.service.worker.name[0]}</div>
+                  <div className="avatar-small" style={{ width: '48px', height: '48px', fontSize: '1.2rem' }}>{o.service?.worker?.name?.[0] || '?'}</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <strong style={{ fontSize: '1.1rem' }}>{o.service.worker.name}</strong>
+                      <strong style={{ fontSize: '1.1rem' }}>{o.service?.worker?.name || 'Prestataire'}</strong>
                       <span className={`badge ${o.status === 'ACCEPTED' ? 'badge-auto' : 'badge-manual'}`} style={{ fontSize: '0.6rem' }}>{o.status}</span>
                     </div>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.2rem' }}>{o.service.title}</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.2rem' }}>{o.service?.title}</p>
                   </div>
                 </div>
               </div>

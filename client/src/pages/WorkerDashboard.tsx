@@ -218,8 +218,8 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
                       </div>
                     </td>
                     <td data-label={t.service}>
-                      <div style={{ fontWeight: '700' }}>{o.service.title}</div>
-                      <small className="badge-auto" style={{ fontSize: '0.65rem' }}>{o.service.category.name}</small>
+                      <div style={{ fontWeight: '700' }}>{o.service?.title}</div>
+                      <small className="badge-auto" style={{ fontSize: '0.65rem' }}>{o.service?.category?.name}</small>
                     </td>
                     <td data-label={t.date}>
                       <div className="date-cell">
@@ -297,7 +297,7 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
               {services.map(s => (
                 <div key={s.id} className="card service-item-card">
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                    <span className="category-badge">{s.category.name}</span>
+                    <span className="category-badge">{s.category?.name}</span>
                     <button className="btn-icon-danger" onClick={() => handleDeleteService(s.id)}><Trash2 size={16} /></button>
                   </div>
                   <h4 style={{ fontWeight: '800', fontSize: '1.1rem', marginBottom: '0.5rem' }}>{s.title}</h4>
@@ -344,7 +344,7 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
                       <strong style={{ fontSize: '1.1rem' }}>{o.client?.name || 'Inconnu'}</strong>
                       <span className={`badge ${o.status === 'ACCEPTED' ? 'badge-auto' : 'badge-manual'}`} style={{ fontSize: '0.6rem' }}>{o.status}</span>
                     </div>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.2rem' }}>{o.service.title}</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.2rem' }}>{o.service?.title}</p>
                   </div>
                 </div>
               </div>
