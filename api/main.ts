@@ -10,7 +10,7 @@ import authRoutes from '../server/src/routes/auth.js';
 import serviceRoutes from '../server/src/routes/services.js';
 import adminRoutes from '../server/src/routes/admin.js';
 
-import { firebaseInitError } from '../server/src/config/firebase.js';
+import { firebaseInitError, db } from '../server/src/config/firebase.js';
 
 const app = express();
 
@@ -21,6 +21,17 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+
+// Database check middleware
+app.use('/api', (req, res, next) => {
+  if (!db && req.path !== '/health') {
+    return res.status(503).json({ 
+      message: 'Service Unavailable', 
+      details: firebaseInitError || 'Database connection not established.' 
+    });
+  }
+  next();
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/services', serviceRoutes);

@@ -8,15 +8,28 @@ import adminRoutes from './routes/admin';
 import './config/passport';
 import "dotenv/config";
 
+import { db } from './config/firebase.js';
+
 const app = express();
 
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: process.env.CLIENT_URL || true,
   credentials: true
 }));
 app.use(express.json());
 app.use(cookieParser());
+
+// Database check middleware
+app.use('/api', (req, res, next) => {
+  if (!db && req.path !== '/health') {
+    return res.status(503).json({ 
+      message: 'Service Unavailable', 
+      details: 'Database connection not established. Check server logs and environment variables.' 
+    });
+  }
+  next();
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/services', serviceRoutes);

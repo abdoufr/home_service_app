@@ -10,6 +10,10 @@ const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-for-jwt-12345';
 router.post('/register', async (req: Request, res: Response) => {
   try {
     const { email, password, name, phone, role, latitude, longitude } = req.body;
+    
+    if (!db) {
+      return res.status(503).json({ message: 'Database not available', details: 'Firebase failed to initialize' });
+    }
 
     if (!['ADMIN', 'WORKER', 'CLIENT'].includes(role)) {
       return res.status(400).json({ message: 'Invalid role' });
@@ -57,6 +61,10 @@ router.post('/register', async (req: Request, res: Response) => {
 router.post('/login', async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
+
+    if (!db) {
+      return res.status(503).json({ message: 'Database not available', details: 'Firebase failed to initialize' });
+    }
 
     const userSnapshot = await db.collection('users').where('email', '==', email).limit(1).get();
     if (userSnapshot.empty) {
@@ -113,6 +121,11 @@ router.patch('/profile/location', authenticate, async (req: Request, res: Respon
 router.get('/me', authenticate, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.userId;
+    
+    if (!db) {
+      return res.status(503).json({ message: 'Database not available', details: 'Firebase failed to initialize' });
+    }
+
     const userDoc = await db.collection('users').doc(userId).get();
     
     if (!userDoc.exists) {
