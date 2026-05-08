@@ -22,7 +22,7 @@ router.get('/workers', authenticate, async (req: Request, res: Response) => {
         latitude: data.latitude,
         longitude: data.longitude
       };
-    }).filter(w => w.latitude && w.longitude); // Only return workers with locations
+    }).filter((w: any) => w.latitude && w.longitude); // Only return workers with locations
 
     res.json(workers);
   } catch (error) {
@@ -189,7 +189,7 @@ router.get('/orders/worker', authenticate, authorize(['WORKER']), async (req: Re
         });
       }
     }
-    res.json(workerOrders.sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
+    res.json(workerOrders.sort((a: any, b: any) => b.createdAt.localeCompare(a.createdAt)));
   } catch (error) {
     res.status(500).json({ message: 'Error fetching orders' });
   }
