@@ -83,8 +83,9 @@ router.post('/login', async (req: Request, res: Response) => {
     });
 
     res.json({ message: 'Logged in successfully', user: { id: user.id, email: user.email, name: user.name, role: user.role } });
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
+  } catch (error: any) {
+    console.error("Login Error:", error);
+    res.status(500).json({ message: 'Internal server error', details: error.message });
   }
 });
 
@@ -128,8 +129,9 @@ router.get('/me', authenticate, async (req: Request, res: Response) => {
       latitude: user?.latitude,
       longitude: user?.longitude
     });
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
+  } catch (error: any) {
+    console.error("Auth Me Error:", error);
+    res.status(500).json({ message: 'Internal server error', details: error.message });
   }
 });
 

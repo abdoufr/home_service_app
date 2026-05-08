@@ -44,3 +44,7 @@ if (!admin.apps.length) {
 
 export const db = admin.apps.length ? admin.firestore() : null as any;
 export const auth = admin.apps.length ? admin.auth() : null as any;
+
+if (!db) {
+  console.error("❌ Critical: Firestore not initialized. Check your environment variables.");
+}
