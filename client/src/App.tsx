@@ -109,7 +109,13 @@ function App() {
         if (res.ok) return res.json();
         throw new Error('Not logged in');
       })
-      .then(userData => setUser(userData))
+      .then(userData => {
+        setUser(userData);
+        // Request notification permission when user is logged in
+        if ("Notification" in window && Notification.permission === "default") {
+          Notification.requestPermission();
+        }
+      })
       .catch(() => setUser(null))
       .finally(() => setAuthLoading(false));
   }, []);
@@ -128,8 +134,18 @@ function App() {
             if (newNotifs.length > 0 && prev.length > 0) {
               const latest = newNotifs[0];
               const title = latest.type === 'MESSAGE' ? t.newMsg : latest.type === 'NEW_ORDER' ? t.newOrder : t.orderAccepted;
+              
+              // UI Toast
               setShowToast({ title, content: latest.content });
               setTimeout(() => setShowToast(null), 5000);
+
+              // Browser Notification
+              if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(title, {
+                  body: latest.content,
+                  icon: '/favicon.ico' // Or any relevant icon
+                });
+              }
             }
             return data;
           });
