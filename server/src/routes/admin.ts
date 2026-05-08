@@ -12,7 +12,7 @@ router.get('/users', async (req: Request, res: Response) => {
   try {
     const { status } = req.query;
     const snapshot = await db.collection('users').get();
-    let users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    let users = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
     
     users = users.filter((u: any) => u.role !== 'ADMIN');
     if (status === 'pending') users = users.filter((u: any) => u.approved === false);
@@ -121,13 +121,13 @@ router.delete('/categories/:id', async (req: Request, res: Response) => {
 router.get('/support/conversations', async (req: Request, res: Response) => {
   try {
     const snapshot = await db.collection('supportMessages').get();
-    const allMsgs = snapshot.docs.map(doc => doc.data());
+    const allMsgs = snapshot.docs.map((doc: any) => doc.data());
     const uniqueUserIds = Array.from(new Set(allMsgs.map(m => m.userId)));
     
     const conversations = await Promise.all(uniqueUserIds.map(async uid => {
       const userDoc = await db.collection('users').doc(uid).get();
       const lastMsgSnapshot = await db.collection('supportMessages').where('userId', '==', uid).get();
-      const lastMsg = lastMsgSnapshot.docs.map(d => d.data()).sort((a,b) => b.createdAt.localeCompare(a.createdAt))[0];
+      const lastMsg = lastMsgSnapshot.docs.map((d: any) => d.data()).sort((a: any, b: any) => b.createdAt.localeCompare(a.createdAt))[0];
       
       return {
         id: uid,
@@ -146,7 +146,7 @@ router.get('/support/conversations', async (req: Request, res: Response) => {
 router.get('/support/messages/:userId', async (req: Request, res: Response) => {
   try {
     const snapshot = await db.collection('supportMessages').where('userId', '==', req.params.userId).get();
-    const messages = snapshot.docs.map(doc => doc.data());
+    const messages = snapshot.docs.map((doc: any) => doc.data());
     res.json(messages.sort((a:any, b:any) => a.createdAt.localeCompare(b.createdAt)));
   } catch (error) {
     res.status(500).json({ message: 'Error fetching messages' });

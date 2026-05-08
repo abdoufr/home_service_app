@@ -13,7 +13,7 @@ router.get('/workers', authenticate, async (req: Request, res: Response) => {
       .where('approved', '==', true)
       .get();
     
-    const workers = snapshot.docs.map(doc => {
+    const workers = snapshot.docs.map((doc: any) => {
       const data = doc.data();
       return {
         id: doc.id,
@@ -45,7 +45,7 @@ const getPopulatedService = async (srv: any) => {
 router.get('/categories', async (req: Request, res: Response) => {
   try {
     const snapshot = await db.collection('categories').get();
-    const categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const categories = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
     res.json(categories);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching categories' });
@@ -56,7 +56,7 @@ router.get('/categories', async (req: Request, res: Response) => {
 router.get('/', async (req: Request, res: Response) => {
   try {
     const snapshot = await db.collection('services').get();
-    const services = await Promise.all(snapshot.docs.map(async doc => {
+    const services = await Promise.all(snapshot.docs.map(async (doc: any) => {
       return getPopulatedService({ id: doc.id, ...doc.data() });
     }));
     res.json(services);
@@ -132,7 +132,7 @@ router.get('/worker/me', authenticate, authorize(['WORKER']), async (req: Reques
   try {
     const workerId = (req as any).user.userId;
     const snapshot = await db.collection('services').where('workerId', '==', workerId).get();
-    const services = await Promise.all(snapshot.docs.map(async doc => {
+    const services = await Promise.all(snapshot.docs.map(async (doc: any) => {
       const catDoc = await db.collection('categories').doc(doc.data().categoryId).get();
       return { id: doc.id, ...doc.data(), category: catDoc.data() };
     }));
@@ -158,7 +158,7 @@ router.get('/orders/client', authenticate, authorize(['CLIENT']), async (req: Re
   try {
     const clientId = (req as any).user.userId;
     const snapshot = await db.collection('orders').where('clientId', '==', clientId).get();
-    const orders = await Promise.all(snapshot.docs.map(async doc => {
+    const orders = await Promise.all(snapshot.docs.map(async (doc: any) => {
       const ord = doc.data();
       const serviceDoc = await db.collection('services').doc(ord.serviceId).get();
       const service = serviceDoc.exists ? await getPopulatedService({ id: serviceDoc.id, ...serviceDoc.data() }) : null;
@@ -175,7 +175,7 @@ router.get('/orders/worker', authenticate, authorize(['WORKER']), async (req: Re
   try {
     const workerId = (req as any).user.userId;
     const snapshot = await db.collection('orders').get(); // Note: Firestore doesn't support nested where easily without denormalization
-    const allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const allOrders = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
     
     const workerOrders = [];
     for (const ord of allOrders as any[]) {
@@ -233,7 +233,7 @@ router.get('/notifications', authenticate, async (req: Request, res: Response) =
   try {
     const userId = (req as any).user.userId;
     const snapshot = await db.collection('notifications').where('userId', '==', userId).get();
-    const notifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const notifs = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
     res.json(notifs.sort((a:any, b:any) => b.createdAt.localeCompare(a.createdAt)));
   } catch (error) {
     res.status(500).json({ message: 'Error fetching notifications' });
@@ -254,7 +254,7 @@ router.get('/orders/:id/messages', authenticate, async (req: Request, res: Respo
   try {
     const orderId = req.params.id as string;
     const snapshot = await db.collection('messages').where('orderId', '==', orderId).get();
-    const messages = await Promise.all(snapshot.docs.map(async doc => {
+    const messages = await Promise.all(snapshot.docs.map(async (doc: any) => {
       const msg = doc.data();
       const senderDoc = await db.collection('users').doc(msg.senderId).get();
       return { id: doc.id, ...msg, sender: { name: senderDoc.data()?.name, id: senderDoc.id } };
@@ -312,7 +312,7 @@ router.get('/support/messages', authenticate, async (req: Request, res: Response
   try {
     const userId = (req as any).user.userId;
     const snapshot = await db.collection('supportMessages').where('userId', '==', userId).get();
-    const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const messages = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
     res.json(messages.sort((a:any, b:any) => a.createdAt.localeCompare(b.createdAt)));
   } catch (error) {
     res.status(500).json({ message: 'Error fetching support messages' });
