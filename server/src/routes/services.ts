@@ -198,7 +198,7 @@ router.get('/orders/worker', authenticate, authorize(['WORKER']), async (req: Re
 // Update order status
 router.patch('/orders/:id/status', authenticate, authorize(['WORKER', 'CLIENT']), async (req: Request, res: Response) => {
   try {
-    const orderId = req.query.orderId as string;
+    const orderId = req.params.id;
     if (!orderId) return res.status(400).json({ message: 'Missing orderId' });
     const { status } = req.body;
     const orderRef = db.collection('orders').doc(orderId);

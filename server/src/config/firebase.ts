@@ -53,8 +53,8 @@ if (!admin.apps.length) {
   }
 }
 
-export const db = admin.apps.length ? admin.firestore() : null;
-export const auth = admin.apps.length ? admin.auth() : null;
+export const db = admin.apps.length ? admin.firestore() : null as any;
+export const auth = admin.apps.length ? admin.auth() : null as any;
 
 if (!db) {
   console.error("⚠️ Warning: Firestore is NOT initialized. Database calls will fail.");
