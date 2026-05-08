@@ -82,8 +82,8 @@ router.get('/stats', async (_req: Request, res: Response) => {
       db.collection('orders').get()
     ]);
     
-    const totalUsers = users.docs.filter(d => d.data().role !== 'ADMIN').length;
-    const pendingUsers = users.docs.filter(d => d.data().approved === false).length;
+    const totalUsers = users.docs.filter((d: any) => d.data().role !== 'ADMIN').length;
+    const pendingUsers = users.docs.filter((d: any) => d.data().approved === false).length;
 
     res.json({
       totalUsers,
@@ -122,9 +122,9 @@ router.get('/support/conversations', async (req: Request, res: Response) => {
   try {
     const snapshot = await db.collection('supportMessages').get();
     const allMsgs = snapshot.docs.map((doc: any) => doc.data());
-    const uniqueUserIds = Array.from(new Set(allMsgs.map(m => m.userId)));
+    const uniqueUserIds = Array.from(new Set(allMsgs.map((m: any) => m.userId)));
     
-    const conversations = await Promise.all(uniqueUserIds.map(async uid => {
+    const conversations = await Promise.all(uniqueUserIds.map(async (uid: any) => {
       const userDoc = await db.collection('users').doc(uid).get();
       const lastMsgSnapshot = await db.collection('supportMessages').where('userId', '==', uid).get();
       const lastMsg = lastMsgSnapshot.docs.map((d: any) => d.data()).sort((a: any, b: any) => b.createdAt.localeCompare(a.createdAt))[0];
