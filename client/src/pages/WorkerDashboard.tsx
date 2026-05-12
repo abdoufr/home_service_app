@@ -140,49 +140,56 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
         lang={lang} 
       />}
       
-      <div className="tab-switcher glass-panel" style={{ marginBottom: '2rem', padding: '0.4rem', borderRadius: '100px', width: 'fit-content', margin: '0 auto 2.5rem' }}>
-        <button className={`btn ${activeTab === 'orders' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('orders')} style={{ padding: '0.6rem 1.5rem' }}>
+      <div className="tab-switcher glass-panel" style={{ marginBottom: '3rem', padding: '0.4rem', borderRadius: '100px', width: 'fit-content' }}>
+        <button className={`btn ${activeTab === 'orders' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('orders')} style={{ padding: '0.6rem 1.5rem' }}>
           {t.orders}
         </button>
-        <button className={`btn ${activeTab === 'services' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('services')} style={{ padding: '0.6rem 1.5rem' }}>
+        <button className={`btn ${activeTab === 'services' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('services')} style={{ padding: '0.6rem 1.5rem' }}>
           {t.worker}
         </button>
-        <button className={`btn ${activeTab === 'chat' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('chat')} style={{ padding: '0.6rem 1.5rem' }}>
+        <button className={`btn ${activeTab === 'chat' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('chat')} style={{ padding: '0.6rem 1.5rem' }}>
           {t.chat}
         </button>
-        <button className={`btn ${activeTab === 'location' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('location')} style={{ padding: '0.6rem 1.5rem' }}>
-          <MapPin size={18} style={{ marginRight: '8px' }} /> {lang === 'ar' ? 'موقعي' : 'Ma Position'}
+        <button className={`btn ${activeTab === 'location' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('location')} style={{ padding: '0.6rem 1.5rem' }}>
+          <MapPin size={18} /> {lang === 'ar' ? 'موقعي' : 'Ma Position'}
         </button>
       </div>
 
-      {/* Modern Stats Grid */}
-      <div className="stats-grid-modern" style={{ marginBottom: '3rem' }}>
-        <div className="stat-card glass-panel">
-          <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--primary)' }}><ClipboardList size={24} /></div>
-          <div className="stat-info">
-            <span className="stat-label">{t.orders}</span>
-            <span className="stat-value">{stats.total}</span>
+      <div className="bento-grid" style={{ marginBottom: '3rem' }}>
+        <div className="bento-card" style={{ gridColumn: 'span 3' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', padding: '1rem', borderRadius: '16px' }}><ClipboardList size={24} /></div>
+            <div>
+              <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-sub)', textTransform: 'uppercase' }}>{t.orders}</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: '900' }}>{stats.total}</div>
+            </div>
           </div>
         </div>
-        <div className="stat-card glass-panel">
-          <div className="stat-icon" style={{ background: 'rgba(251, 191, 36, 0.1)', color: 'var(--accent)' }}><Clock size={24} /></div>
-          <div className="stat-info">
-            <span className="stat-label">{t.pending}</span>
-            <span className="stat-value">{stats.pending}</span>
+        <div className="bento-card" style={{ gridColumn: 'span 3' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ background: 'rgba(251, 191, 36, 0.1)', color: 'var(--accent)', padding: '1rem', borderRadius: '16px' }}><Clock size={24} /></div>
+            <div>
+              <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-sub)', textTransform: 'uppercase' }}>{t.pending}</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: '900' }}>{stats.pending}</div>
+            </div>
           </div>
         </div>
-        <div className="stat-card glass-panel">
-          <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)' }}><CheckCircle size={24} /></div>
-          <div className="stat-info">
-            <span className="stat-label">{t.stats}</span>
-            <span className="stat-value">{stats.completed}</span>
+        <div className="bento-card" style={{ gridColumn: 'span 3' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', padding: '1rem', borderRadius: '16px' }}><CheckCircle size={24} /></div>
+            <div>
+              <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-sub)', textTransform: 'uppercase' }}>{t.stats}</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: '900' }}>{stats.completed}</div>
+            </div>
           </div>
         </div>
-        <div className="stat-card glass-panel" style={{ background: 'linear-gradient(135deg, var(--primary-glow), transparent)' }}>
-          <div className="stat-icon" style={{ background: 'var(--primary)', color: 'white' }}><TrendingUp size={24} /></div>
-          <div className="stat-info">
-            <span className="stat-label">DZD</span>
-            <span className="stat-value">{stats.earnings}</span>
+        <div className="bento-card" style={{ gridColumn: 'span 3', background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'white' }}>
+            <div style={{ background: 'rgba(255, 255, 255, 0.2)', padding: '1rem', borderRadius: '16px' }}><TrendingUp size={24} /></div>
+            <div>
+              <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase' }}>DZD</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: '900' }}>{stats.earnings}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -190,80 +197,78 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
       {msg && <div className="toast success animate-fade-in" style={{ position: 'static', maxWidth: 'none', marginBottom: '2rem' }}>{msg}</div>}
 
       {activeTab === 'orders' && (
-        <div className="orders-section animate-fade-in">
-          <div className="table-responsive">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Client</th>
-                  <th>{t.service}</th>
-                  <th>{t.date}</th>
-                  <th>{t.status}</th>
-                  <th>{t.actions}</th>
+        <div className="deck-table-wrap animate-slide-up">
+          <table className="deck-table">
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>{t.service}</th>
+                <th>{t.date}</th>
+                <th>{t.status}</th>
+                <th>{t.actions}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.length === 0 && (
+                <tr><td colSpan={5} style={{ textAlign: 'center', padding: '5rem', color: 'var(--text-sub)' }}>{t.noNotifs}</td></tr>
+              )}
+              {orders.map(o => (
+                <tr key={o.id}>
+                  <td data-label="Client">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <div className="avatar-small" style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--bg-card)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800' }}>{o.client?.name?.[0] || '?'}</div>
+                      <div>
+                        <strong style={{ fontSize: '0.9rem' }}>{o.client?.name || 'Inconnu'}</strong>
+                        {o.status === 'ACCEPTED' && <div style={{ fontSize: '0.7rem', color: 'var(--primary-light)' }}>📞 {o.client?.phone || 'N/A'}</div>}
+                      </div>
+                    </div>
+                  </td>
+                  <td data-label={t.service}>
+                    <div style={{ fontWeight: '800' }}>{o.service?.title}</div>
+                    <small className="badge-auto" style={{ fontSize: '0.65rem' }}>{o.service?.category?.name}</small>
+                  </td>
+                  <td data-label={t.date}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                      <Clock size={14} />
+                      {o.scheduledAt ? new Date(o.scheduledAt).toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : 'N/A'}
+                    </div>
+                  </td>
+                  <td data-label={t.status}>
+                    <span className={`badge ${o.status === 'PENDING' ? 'badge-manual' : o.status === 'ACCEPTED' ? 'badge-auto' : o.status === 'COMPLETED' ? 'badge-success' : 'badge-danger'}`}>
+                      {o.status}
+                    </span>
+                  </td>
+                  <td data-label={t.actions}>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      {o.status === 'PENDING' && (
+                        <>
+                          <button className="btn btn-primary btn-sm" style={{ padding: '0.5rem 1rem' }} onClick={() => handleUpdateStatus(o.id, 'ACCEPTED')}>{t.approve}</button>
+                          <button className="btn btn-outline btn-sm" onClick={() => handleUpdateStatus(o.id, 'CANCELLED')} style={{ border: 'none', color: 'var(--danger)' }}><XCircle size={18} /></button>
+                        </>
+                      )}
+                      {o.status === 'ACCEPTED' && (
+                        <>
+                          <button className="btn btn-primary btn-sm" style={{ padding: '0.5rem 1rem' }} onClick={() => handleUpdateStatus(o.id, 'COMPLETED')}><CheckCircle size={16} /> OK</button>
+                          <button className="btn btn-outline btn-sm" onClick={() => setActiveChat(o.id)}><MessageCircle size={16} /></button>
+                          <button className="btn btn-outline btn-sm" onClick={() => handleUpdateStatus(o.id, 'CANCELLED')} style={{ border: 'none', color: 'var(--danger)' }}><Trash2 size={16} /></button>
+                        </>
+                      )}
+                      {((o.status === 'CANCELLED' || o.status === 'COMPLETED') && !o.workerChatClearedAt) && (
+                        <button className="btn btn-outline btn-sm" onClick={() => setActiveChat(o.id)}><MessageCircle size={16} /> Chat</button>
+                      )}
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {orders.length === 0 && (
-                  <tr><td colSpan={5} style={{ textAlign: 'center', padding: '5rem' }}>{t.noNotifs}</td></tr>
-                )}
-                {orders.map(o => (
-                  <tr key={o.id}>
-                    <td data-label="Client">
-                      <div className="client-cell">
-                        <div className="avatar-small">{o.client?.name?.[0] || '?'}</div>
-                        <div>
-                          <strong>{o.client?.name || 'Inconnu'}</strong>
-                          {o.status === 'ACCEPTED' && <div className="phone-link">📞 {o.client?.phone || 'N/A'}</div>}
-                        </div>
-                      </div>
-                    </td>
-                    <td data-label={t.service}>
-                      <div style={{ fontWeight: '700' }}>{o.service?.title}</div>
-                      <small className="badge-auto" style={{ fontSize: '0.65rem' }}>{o.service?.category?.name}</small>
-                    </td>
-                    <td data-label={t.date}>
-                      <div className="date-cell">
-                        <Clock size={14} />
-                        {o.scheduledAt ? new Date(o.scheduledAt).toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : 'N/A'}
-                      </div>
-                    </td>
-                    <td data-label={t.status}>
-                      <span className={`badge ${o.status === 'PENDING' ? 'badge-manual' : o.status === 'ACCEPTED' ? 'badge-auto' : o.status === 'COMPLETED' ? 'badge-success' : 'badge-danger'}`}>
-                        {o.status}
-                      </span>
-                    </td>
-                    <td data-label={t.actions}>
-                      <div className="action-buttons-worker">
-                        {o.status === 'PENDING' && (
-                          <>
-                            <button className="btn btn-primary btn-sm" onClick={() => handleUpdateStatus(o.id, 'ACCEPTED')}>{t.approve}</button>
-                            <button className="btn btn-outline btn-sm btn-danger" onClick={() => handleUpdateStatus(o.id, 'CANCELLED')} style={{ border: 'none' }}><XCircle size={18} /></button>
-                          </>
-                        )}
-                        {o.status === 'ACCEPTED' && (
-                          <>
-                            <button className="btn btn-primary btn-sm" onClick={() => handleUpdateStatus(o.id, 'COMPLETED')}><CheckCircle size={16} /> OK</button>
-                            <button className="btn btn-outline btn-sm" onClick={() => setActiveChat(o.id)}><MessageCircle size={16} /></button>
-                            <button className="btn btn-outline btn-sm btn-danger" onClick={() => handleUpdateStatus(o.id, 'CANCELLED')} style={{ border: 'none' }}><Trash2 size={16} /></button>
-                          </>
-                        )}
-                        {((o.status === 'CANCELLED' || o.status === 'COMPLETED') && !o.workerChatClearedAt) && (
-                          <button className="btn btn-outline btn-sm" onClick={() => setActiveChat(o.id)}><MessageCircle size={16} /> Chat</button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
       {activeTab === 'services' && (
-        <div className="services-worker-layout animate-fade-in">
-          <div className="glass-panel add-service-form">
-            <h3 style={{ marginBottom: '1.5rem', fontWeight: '800' }}>{t.addService}</h3>
+        <div className="bento-grid animate-slide-up">
+          <div className="bento-card" style={{ gridColumn: 'span 4' }}>
+            <h3 style={{ marginBottom: '2rem', fontWeight: '900', fontSize: '1.5rem' }}>{t.addService}</h3>
             <form onSubmit={handleCreateService}>
               <div className="input-group">
                 <label>{t.title}</label>
@@ -288,20 +293,20 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
             </form>
           </div>
 
-          <div className="active-services-list">
-            <h3 style={{ marginBottom: '1.5rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <Briefcase size={22} color="var(--primary)" /> {t.myActiveServices}
+          <div style={{ gridColumn: 'span 8' }}>
+            <h3 style={{ marginBottom: '2rem', fontWeight: '900', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <Briefcase size={24} color="var(--primary)" /> {t.myActiveServices}
             </h3>
-            <div className="adaptive-grid">
-              {services.length === 0 && <div className="empty-state-mini">{t.noActiveServices}</div>}
+            <div className="bento-grid">
+              {services.length === 0 && <div className="bento-card" style={{ gridColumn: 'span 12', textAlign: 'center', color: 'var(--text-sub)' }}>{t.noActiveServices}</div>}
               {services.map(s => (
-                <div key={s.id} className="card service-item-card">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                    <span className="category-badge">{s.category?.name}</span>
-                    <button className="btn-icon-danger" onClick={() => handleDeleteService(s.id)}><Trash2 size={16} /></button>
+                <div key={s.id} className="bento-card" style={{ gridColumn: 'span 6' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                    <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--accent)', textTransform: 'uppercase' }}>{s.category?.name}</span>
+                    <button className="btn-icon-danger" onClick={() => handleDeleteService(s.id)} style={{ color: 'var(--danger)', background: 'transparent', border: 'none', cursor: 'pointer' }}><Trash2 size={18} /></button>
                   </div>
-                  <h4 style={{ fontWeight: '800', fontSize: '1.1rem', marginBottom: '0.5rem' }}>{s.title}</h4>
-                  <div className="price-tag-modern">{s.price} <small>DZD</small></div>
+                  <h4 style={{ fontWeight: '800', fontSize: '1.3rem', marginBottom: '0.5rem' }}>{s.title}</h4>
+                  <div style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--primary-light)', marginTop: 'auto' }}>{s.price} <small style={{ fontSize: '0.7rem' }}>DZD</small></div>
                 </div>
               ))}
             </div>
@@ -310,12 +315,12 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
       )}
 
       {activeTab === 'location' && (
-        <div className="animate-fade-in">
-          <div className="glass-panel" style={{ padding: '2rem' }}>
-            <h3 style={{ marginBottom: '1.5rem', fontWeight: '800' }}>
+        <div className="animate-slide-up">
+          <div className="bento-card" style={{ gridColumn: 'span 12' }}>
+            <h3 style={{ marginBottom: '1.5rem', fontWeight: '900', fontSize: '1.8rem' }}>
               {lang === 'ar' ? 'تحديد موقع عملك' : 'Définir votre zone de travail'}
             </h3>
-            <p style={{ marginBottom: '1.5rem', color: 'var(--text-muted)' }}>
+            <p style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>
               {lang === 'ar' ? 'سيتمكن الزبائن من رؤيتك على الخريطة.' : 'Les clients pourront vous voir sur la carte.'}
             </p>
             <MapPicker 
@@ -327,31 +332,32 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
       )}
       
       {activeTab === 'chat' && (
-        <div className="chat-tab-section animate-fade-in">
-          <div className="adaptive-grid">
-            {chatOrders.length === 0 && (
-              <div className="empty-state-full" style={{ gridColumn: '1/-1', textAlign: 'center', padding: '5rem' }}>
-                <MessageCircle size={64} style={{ opacity: 0.1, marginBottom: '1rem' }} />
-                <p>{lang === 'ar' ? 'لا توجد محادثات نشطة' : 'Aucune conversation active'}</p>
-              </div>
-            )}
-            {chatOrders.map(o => (
-              <div key={o.id} className="card chat-order-card" onClick={() => setActiveChat(o.id)} style={{ cursor: 'pointer' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div className="avatar-small" style={{ width: '48px', height: '48px', fontSize: '1.2rem' }}>{o.client?.name?.[0] || '?'}</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <strong style={{ fontSize: '1.1rem' }}>{o.client?.name || 'Inconnu'}</strong>
-                      <span className={`badge ${o.status === 'ACCEPTED' ? 'badge-auto' : 'badge-manual'}`} style={{ fontSize: '0.6rem' }}>{o.status}</span>
-                    </div>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.2rem' }}>{o.service?.title}</p>
+        <div className="bento-grid animate-slide-up">
+          {chatOrders.length === 0 && (
+            <div style={{ gridColumn: 'span 12', textAlign: 'center', padding: '5rem' }}>
+              <MessageCircle size={64} style={{ opacity: 0.1, marginBottom: '1.5rem' }} />
+              <p>{lang === 'ar' ? 'لا توجد محادثات نشطة' : 'Aucune conversation active'}</p>
+            </div>
+          )}
+          {chatOrders.map(o => (
+            <div key={o.id} className="bento-card" onClick={() => setActiveChat(o.id)} style={{ cursor: 'pointer', gridColumn: 'span 4' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                <div className="avatar-small" style={{ width: '56px', height: '56px', fontSize: '1.4rem', background: 'var(--primary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900' }}>{o.client?.name?.[0] || '?'}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
+                    <strong style={{ fontSize: '1.2rem' }}>{o.client?.name || 'Inconnu'}</strong>
+                    <span className={`badge ${o.status === 'ACCEPTED' ? 'badge-auto' : 'badge-manual'}`} style={{ fontSize: '0.6rem' }}>{o.status}</span>
                   </div>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{o.service?.title}</p>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       )}
+    </div>
+  );
+}
 
       <style>{`
         .stats-grid-modern { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; }

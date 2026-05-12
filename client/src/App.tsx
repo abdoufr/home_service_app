@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } f
 import {
   ShieldCheck, Settings, UserCheck, Briefcase,
   Users, ClipboardList, LogOut, Bell, Zap,
-  CheckCircle, Clock, XCircle, Tag, Trash2, Plus, Globe, Moon, Sun, ShieldAlert, Menu, X, Home, Search, ShoppingBag
+  CheckCircle, Clock, XCircle, Tag, Trash2, Plus, Globe, Moon, Sun, ShieldAlert, Menu, X, Home, Search, ShoppingBag, LayoutDashboard
 } from 'lucide-react';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -52,6 +52,47 @@ const translations: any = {
     contactAdmin: "الدعم الفني"
   }
 };
+
+function Sidebar({ user, t, onLogout }: { user: any, t: any, onLogout: () => void }) {
+  const location = useLocation();
+  if (!user) return null;
+
+  const links = [
+    { to: "/", icon: <Home size={22} />, label: t.home },
+    ...(user.role === 'ADMIN' ? [{ to: "/admin", icon: <ShieldAlert size={22} />, label: t.admin }] : []),
+    ...(user.role === 'WORKER' ? [{ to: "/worker", icon: <Briefcase size={22} />, label: t.worker }] : []),
+    ...(user.role === 'CLIENT' ? [{ to: "/services", icon: <Search size={22} />, label: t.explorer }] : []),
+  ];
+
+  return (
+    <aside className="sidebar">
+      <Link to="/" className="sidebar-logo">
+        <div className="icon"><ShieldCheck size={24} /></div>
+        Home<span>Serv</span>
+      </Link>
+      
+      <nav className="sidebar-nav">
+        {links.map((link) => (
+          <Link 
+            key={link.to} 
+            to={link.to} 
+            className={`sidebar-link ${location.pathname === link.to ? 'active' : ''}`}
+          >
+            {link.icon}
+            <span>{link.label}</span>
+          </Link>
+        ))}
+      </nav>
+
+      <div className="sidebar-footer">
+        <button className="sidebar-link" onClick={onLogout} style={{ border: 'none', background: 'transparent', width: '100%', cursor: 'pointer' }}>
+          <LogOut size={22} />
+          <span>{t.logout}</span>
+        </button>
+      </div>
+    </aside>
+  );
+}
 
 function BottomNav({ user, t }: { user: any, t: any }) {
   const location = useLocation();
@@ -111,7 +152,6 @@ function App() {
       })
       .then(userData => {
         setUser(userData);
-        // Request notification permission when user is logged in
         if ("Notification" in window && Notification.permission === "default") {
           Notification.requestPermission();
         }
@@ -134,17 +174,10 @@ function App() {
             if (newNotifs.length > 0 && prev.length > 0) {
               const latest = newNotifs[0];
               const title = latest.type === 'MESSAGE' ? t.newMsg : latest.type === 'NEW_ORDER' ? t.newOrder : t.orderAccepted;
-              
-              // UI Toast
               setShowToast({ title, content: latest.content });
               setTimeout(() => setShowToast(null), 5000);
-
-              // Browser Notification
               if ("Notification" in window && Notification.permission === "granted") {
-                new Notification(title, {
-                  body: latest.content,
-                  icon: '/favicon.ico' // Or any relevant icon
-                });
+                new Notification(title, { body: latest.content, icon: '/favicon.ico' });
               }
             }
             return data;
@@ -171,191 +204,127 @@ function App() {
     }
   };
 
+  const handleLogout = async () => {
+     // Perform actual logout logic if needed, then:
+     setUser(null);
+  };
+
   if (authLoading) {
-    return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-root)' }}>
-      <Zap size={48} color="var(--primary)" className="spin" />
+    return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#020617' }}>
+      <Zap size={48} color="#6366f1" className="spin" />
     </div>;
   }
 
   return (
     <Router>
-      <div className="app">
-        <nav className="navbar">
-          <Link to="/" className="navbar-brand">
-            <div className="brand-icon">
-              <ShieldCheck size={26} color="white" />
-            </div>
-            Home<span>Serv</span>
-          </Link>
+      <div className="aurora-bg"></div>
+      
+      {user && <Sidebar user={user} t={t} onLogout={handleLogout} />}
 
-          <div className="nav-links">
-            <Link to="/">{t.home}</Link>
-            {user?.role === 'ADMIN' && <Link to="/admin">{t.admin}</Link>}
-            {user?.role === 'WORKER' && <Link to="/worker">{t.worker}</Link>}
-            {user?.role === 'CLIENT' && <Link to="/services">{t.explorer}</Link>}
-          </div>
-
-          <div className="nav-actions">
-            {user && (
-              <button 
-                className="btn btn-outline" 
-                style={{ border: 'none', padding: '0.6rem', position: 'relative' }}
-                onClick={() => { setShowNotifications(!showNotifications); setShowSettings(false); }}
-              >
-                <Bell size={22} color={unreadCount > 0 ? 'var(--primary-light)' : 'var(--text-muted)'} />
-                {unreadCount > 0 && <span className="notification-dot">{unreadCount}</span>}
-              </button>
-            )}
-
-            <button 
-              className="btn btn-outline" 
-              style={{ border: 'none', padding: '0.6rem' }}
-              onClick={() => { setShowSettings(!showSettings); setShowNotifications(false); }}
-            >
-              <Settings size={22} color="var(--text-muted)" />
-            </button>
-
-            {user ? (
-              <div className="user-profile-mini">
-                <div className="avatar-mini">{user.name[0]}</div>
-                <button className="btn btn-danger btn-sm" onClick={() => setUser(null)} style={{ padding: '0.5rem', border: 'none' }}>
-                  <LogOut size={18} />
-                </button>
-              </div>
-            ) : (
-              <Link to="/login" className="btn btn-primary btn-sm">{t.login}</Link>
-            )}
-          </div>
-        </nav>
-
-        {/* Dropdowns */}
-        {showNotifications && (
-          <div className="dropdown-menu glass-panel animate-fade-in">
-            <div className="dropdown-header">
-              {t.notifications}
-              <X size={18} className="close-icon" onClick={() => setShowNotifications(false)} />
-            </div>
-            <div className="dropdown-content">
-              {notifications.length === 0 && <div className="empty-state">{t.noNotifs}</div>}
-              {notifications.map(n => (
-                <div key={n.id} className={`notification-item ${n.isRead ? 'read' : 'unread'}`} onClick={() => handleNotificationClick(n)}>
-                  <p>{n.content}</p>
-                  <span>{new Date(n.createdAt).toLocaleTimeString()}</span>
+      <main className="main-content animate-slide-up">
+        <header className="page-header">
+           <div className="page-title">
+             <h1>{user ? `Bienvenue, ${user.name}` : 'HomeServ'}</h1>
+           </div>
+           
+           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+             {user && (
+                <div style={{ position: 'relative' }}>
+                  <button className="btn btn-outline" style={{ borderRadius: '50%', width: '48px', height: '48px', padding: 0 }} onClick={() => setShowNotifications(!showNotifications)}>
+                    <Bell size={20} />
+                    {unreadCount > 0 && <span className="notification-dot">{unreadCount}</span>}
+                  </button>
+                  {showNotifications && (
+                    <div className="dropdown-menu glass-panel animate-fade-in" style={{ position: 'absolute', top: '60px', right: 0, display: 'block' }}>
+                      <div className="dropdown-header">{t.notifications}</div>
+                      <div className="dropdown-content">
+                        {notifications.length === 0 && <div className="empty-state">{t.noNotifs}</div>}
+                        {notifications.map(n => (
+                          <div key={n.id} className={`notification-item ${n.isRead ? 'read' : 'unread'}`} onClick={() => handleNotificationClick(n)}>
+                            <p>{n.content}</p>
+                            <span>{new Date(n.createdAt).toLocaleTimeString()}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {showSettings && (
-          <div className="dropdown-menu glass-panel animate-fade-in" style={{ width: '280px' }}>
-            <div className="dropdown-header">{t.settings}</div>
-            <div className="dropdown-content" style={{ padding: '1.5rem' }}>
-              <div className="setting-row">
-                <label>{t.theme}</label>
-                <div className="toggle-group">
-                  <button className={theme === 'light' ? 'active' : ''} onClick={() => setTheme('light')}><Sun size={14} /> {t.light}</button>
-                  <button className={theme === 'dark' ? 'active' : ''} onClick={() => setTheme('dark')}><Moon size={14} /> {t.dark}</button>
+             )}
+             
+             <button className="btn btn-outline" style={{ borderRadius: '50%', width: '48px', height: '48px', padding: 0 }} onClick={() => setShowSettings(!showSettings)}>
+               <Settings size={20} />
+             </button>
+             
+             {showSettings && (
+                <div className="dropdown-menu glass-panel animate-fade-in" style={{ position: 'absolute', top: '150px', right: '3rem', width: '280px', display: 'block', zIndex: 1200 }}>
+                  <div className="dropdown-header">{t.settings}</div>
+                  <div className="dropdown-content" style={{ padding: '1.5rem' }}>
+                    <div className="setting-row">
+                      <label>{t.theme}</label>
+                      <div className="toggle-group">
+                        <button className={theme === 'light' ? 'active' : ''} onClick={() => setTheme('light')}><Sun size={14} /> {t.light}</button>
+                        <button className={theme === 'dark' ? 'active' : ''} onClick={() => setTheme('dark')}><Moon size={14} /> {t.dark}</button>
+                      </div>
+                    </div>
+                    <div className="setting-row">
+                      <label>{t.language}</label>
+                      <div className="lang-group">
+                        <button className={lang === 'fr' ? 'active' : ''} onClick={() => setLang('fr')}>FR</button>
+                        <button className={lang === 'ar' ? 'active' : ''} onClick={() => setLang('ar')}>AR</button>
+                      </div>
+                    </div>
+                    <button className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} onClick={() => { setShowSupportChat(true); setShowSettings(false); }}>
+                      <ShieldAlert size={16} /> {t.contactAdmin}
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div className="setting-row">
-                <label>{t.language}</label>
-                <div className="lang-group">
-                  <button className={lang === 'fr' ? 'active' : ''} onClick={() => setLang('fr')}>FR</button>
-                  <button className={lang === 'ar' ? 'active' : ''} onClick={() => setLang('ar')}>AR</button>
-                </div>
-              </div>
-              <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
-                <button className="btn btn-primary" style={{ width: '100%', fontSize: '0.85rem' }} onClick={() => { setShowSupportChat(true); setShowSettings(false); }}>
-                  <ShieldAlert size={16} /> {t.contactAdmin}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+             )}
+           </div>
+        </header>
 
-        <main className="animate-fade-in">
-          <Routes>
-            <Route path="/" element={
-              user
-                ? user.role === 'ADMIN' ? <Navigate to="/admin" /> : user.role === 'WORKER' ? <Navigate to="/worker" /> : <Navigate to="/services" />
-                : <Navigate to="/login" />
-            } />
-            <Route path="/login" element={user ? <Navigate to="/" /> : <LoginPage onLogin={(u) => setUser(u)} />} />
-            <Route path="/register" element={user ? <Navigate to="/" /> : <RegisterPage onLogin={(u) => setUser(u)} />} />
-            <Route path="/admin" element={user?.role === 'ADMIN' ? <AdminDashboard t={t} lang={lang} /> : <Navigate to="/login" />} />
-            <Route path="/worker" element={user?.role === 'WORKER' ? <WorkerDashboard userId={user.id} t={t} lang={lang} /> : <Navigate to="/login" />} />
-            <Route path="/services" element={user?.role === 'CLIENT' ? <ClientDashboard userId={user.id} t={t} lang={lang} /> : <Navigate to="/login" />} />
-          </Routes>
-        </main>
-        
-        <BottomNav user={user} t={t} />
-        {showSupportChat && <SupportChat isAdmin={false} onClose={() => setShowSupportChat(false)} t={t} lang={lang} />}
+        <Routes>
+          <Route path="/" element={
+            user
+              ? user.role === 'ADMIN' ? <Navigate to="/admin" /> : user.role === 'WORKER' ? <Navigate to="/worker" /> : <Navigate to="/services" />
+              : <Navigate to="/login" />
+          } />
+          <Route path="/login" element={user ? <Navigate to="/" /> : <LoginPage onLogin={(u) => setUser(u)} />} />
+          <Route path="/register" element={user ? <Navigate to="/" /> : <RegisterPage onLogin={(u) => setUser(u)} />} />
+          <Route path="/admin" element={user?.role === 'ADMIN' ? <AdminDashboard t={t} lang={lang} /> : <Navigate to="/login" />} />
+          <Route path="/worker" element={user?.role === 'WORKER' ? <WorkerDashboard userId={user.id} t={t} lang={lang} /> : <Navigate to="/login" />} />
+          <Route path="/services" element={user?.role === 'CLIENT' ? <ClientDashboard userId={user.id} t={t} lang={lang} /> : <Navigate to="/login" />} />
+        </Routes>
+      </main>
+      
+      <BottomNav user={user} t={t} />
+      {showSupportChat && <SupportChat isAdmin={false} onClose={() => setShowSupportChat(false)} t={t} lang={lang} />}
 
-        {/* Toast */}
-        {showToast && (
-          <div className="toast animate-fade-in">
-            <Zap size={20} color="var(--primary-light)" />
-            <div>
-              <strong>{showToast.title}</strong>
-              <p>{showToast.content}</p>
-            </div>
-            <X size={16} onClick={() => setShowToast(null)} style={{ cursor: 'pointer' }} />
+      {/* Toast */}
+      {showToast && (
+        <div className="toast animate-fade-in" style={{ bottom: '100px' }}>
+          <Zap size={20} color="#6366f1" />
+          <div>
+            <strong>{showToast.title}</strong>
+            <p>{showToast.content}</p>
           </div>
-        )}
-      </div>
+          <X size={16} onClick={() => setShowToast(null)} style={{ cursor: 'pointer' }} />
+        </div>
+      )}
 
       <style>{`
         .notification-dot {
-          position: absolute; top: 4px; right: 4px; background: var(--danger);
-          color: white; font-size: 0.65rem; font-weight: 800; min-width: 18px; height: 18px;
-          border-radius: 20px; display: flex; align-items: center; justify-content: center;
-          border: 2px solid var(--bg-surface);
+          position: absolute; top: -4px; right: -4px; background: var(--danger);
+          color: white; font-size: 0.65rem; font-weight: 800; min-width: 20px; height: 20px;
+          border-radius: 50%; display: flex; align-items: center; justify-content: center;
+          border: 2px solid var(--bg-root);
         }
-        .user-profile-mini { display: flex; align-items: center; gap: 0.75rem; }
-        .avatar-mini {
-          width: 36px; height: 36px; border-radius: 50%; background: var(--primary);
-          display: flex; align-items: center; justify-content: center; font-weight: 800; color: white;
-        }
-        .dropdown-menu {
-          position: fixed; top: 90px; right: 2rem; width: 340px; max-width: 90vw; z-index: 1100;
-          padding: 0; overflow: hidden; border: 1px solid var(--glass-border);
-        }
-        .dropdown-header {
-          padding: 1.25rem; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border);
-          font-weight: 800; display: flex; justify-content: space-between; align-items: center;
-        }
-        .dropdown-content { max-height: 400px; overflow-y: auto; }
-        .notification-item {
-          padding: 1.25rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s;
-        }
+        .dropdown-menu { width: 320px; z-index: 1000; display: none; }
+        .dropdown-header { padding: 1.25rem; font-weight: 800; border-bottom: 1px solid var(--border); }
+        .notification-item { padding: 1rem; border-bottom: 1px solid var(--border); cursor: pointer; }
         .notification-item:hover { background: rgba(255,255,255,0.05); }
-        .notification-item.unread { background: rgba(16, 185, 129, 0.04); }
-        .notification-item p { font-size: 0.9rem; margin-bottom: 0.4rem; color: var(--text-main); }
-        .notification-item span { font-size: 0.75rem; color: var(--text-sub); }
-        .empty-state { padding: 3rem; text-align: center; color: var(--text-sub); font-size: 0.9rem; }
-        .setting-row { margin-bottom: 1.25rem; }
-        .setting-row label { display: block; font-size: 0.75rem; font-weight: 800; color: var(--text-sub); margin-bottom: 0.75rem; text-transform: uppercase; }
-        .toggle-group, .lang-group { display: flex; background: rgba(255,255,255,0.05); padding: 0.3rem; border-radius: 12px; gap: 0.3rem; }
-        .toggle-group button, .lang-group button {
-          flex: 1; border: none; background: transparent; color: var(--text-muted); padding: 0.5rem;
-          border-radius: 9px; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-        }
-        .toggle-group button.active, .lang-group button.active { background: var(--primary); color: white; box-shadow: 0 4px 12px var(--primary-glow); }
-        .toast {
-          position: fixed; bottom: 100px; right: 2rem; left: 2rem; max-width: 400px; margin: 0 auto;
-          background: var(--bg-surface); border: 1px solid var(--primary); padding: 1.25rem;
-          border-radius: var(--radius-lg); display: flex; align-items: center; gap: 1rem;
-          box-shadow: var(--shadow-lg); z-index: 2000;
-        }
-        .toast div { flex: 1; }
-        .toast strong { display: block; font-size: 0.95rem; margin-bottom: 0.25rem; }
-        .toast p { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
-        
-        @media (max-width: 768px) {
-          .dropdown-menu { top: 80px; right: 1rem; left: 1rem; width: auto; }
-          .toast { bottom: 90px; }
-        }
+        .notification-item p { font-size: 0.85rem; margin-bottom: 0.2rem; }
+        .notification-item span { font-size: 0.7rem; color: var(--text-sub); }
+        .toast { position: fixed; right: 2rem; background: var(--bg-surface); border: 1px solid var(--primary); padding: 1rem; border-radius: 12px; display: flex; gap: 1rem; z-index: 2000; box-shadow: var(--shadow-xl); }
       `}</style>
     </Router>
   );

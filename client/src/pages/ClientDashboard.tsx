@@ -120,85 +120,80 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
         lang={lang} 
       />}
       
-      <div className="tab-switcher glass-panel" style={{ marginBottom: '2rem', padding: '0.4rem', borderRadius: '100px', width: 'fit-content', margin: '0 auto 2.5rem' }}>
-        <button className={`btn ${activeTab === 'explore' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('explore')} style={{ padding: '0.6rem 2rem' }}>
+      <div className="tab-switcher glass-panel" style={{ marginBottom: '3rem', padding: '0.4rem', borderRadius: '100px', width: 'fit-content' }}>
+        <button className={`btn ${activeTab === 'explore' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('explore')} style={{ padding: '0.6rem 2rem' }}>
           {t.explorer}
         </button>
-        <button className={`btn ${activeTab === 'orders' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('orders')} style={{ padding: '0.6rem 2rem' }}>
+        <button className={`btn ${activeTab === 'orders' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('orders')} style={{ padding: '0.6rem 2rem' }}>
           {t.history}
         </button>
-        <button className={`btn ${activeTab === 'chat' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('chat')} style={{ padding: '0.6rem 2rem' }}>
+        <button className={`btn ${activeTab === 'chat' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('chat')} style={{ padding: '0.6rem 2rem' }}>
           {t.chat}
         </button>
-        <button className={`btn ${activeTab === 'map' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('map')} style={{ padding: '0.6rem 2rem' }}>
-          <MapIcon size={18} style={{ marginRight: '8px' }} /> {lang === 'ar' ? 'الخريطة' : 'Carte'}
+        <button className={`btn ${activeTab === 'map' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('map')} style={{ padding: '0.6rem 2rem' }}>
+          <MapIcon size={18} /> {lang === 'ar' ? 'الخريطة' : 'Carte'}
         </button>
       </div>
 
       {msg && <div className="toast success animate-fade-in" style={{ position: 'static', maxWidth: 'none', marginBottom: '2rem' }}>{msg}</div>}
 
       {activeTab === 'explore' && (
-        <div className="animate-fade-in">
-          {/* Enhanced Search & Filter */}
-          <div className="search-section" style={{ marginBottom: '2.5rem' }}>
-            <div style={{ position: 'relative', marginBottom: '1.25rem' }}>
-              <Search className="search-icon" size={20} />
+        <div className="animate-slide-up">
+          <div className="search-section" style={{ marginBottom: '3rem' }}>
+            <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
+              <Search className="search-icon" size={20} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
               <input 
                 type="text" 
-                className="search-input" 
+                style={{ paddingLeft: '4rem', borderRadius: '100px', height: '60px', background: 'var(--bg-card)' }}
                 placeholder={t.search} 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="categories-pill-scroll">
-              <button className={`pill ${selectedCat === '' ? 'active' : ''}`} onClick={() => setSelectedCat('')}>
+            <div className="categories-pill-scroll" style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '1rem' }}>
+              <button className={`pill ${selectedCat === '' ? 'active' : ''}`} onClick={() => setSelectedCat('')} style={pillStyle(selectedCat === '')}>
                 {t.allCategories}
               </button>
               {categories.map(c => (
-                <button 
-                  key={c.id} 
-                  className={`pill ${selectedCat === c.id ? 'active' : ''}`} 
-                  onClick={() => setSelectedCat(c.id)}
-                >
+                <button key={c.id} className={`pill ${selectedCat === c.id ? 'active' : ''}`} onClick={() => setSelectedCat(c.id)} style={pillStyle(selectedCat === c.id)}>
                   {c.name}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="adaptive-grid">
+          <div className="bento-grid">
             {filteredServices.length === 0 && (
-              <div className="empty-state-full">
-                <Search size={64} />
+              <div style={{ gridColumn: 'span 12', textAlign: 'center', padding: '5rem' }}>
+                <Search size={64} style={{ opacity: 0.1, marginBottom: '1.5rem' }} />
                 <p>{t.noServices}</p>
               </div>
             )}
             {filteredServices.map(s => (
-              <div key={s.id} className="card service-card">
-                <div className="card-top">
-                  <span className="category-badge">{s.category?.name || 'Service'}</span>
-                  <div className="rating">
-                    <Star size={14} fill="var(--accent)" color="var(--accent)" />
-                    <span>4.9</span>
+              <div key={s.id} className="bento-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                  <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--accent)', textTransform: 'uppercase' }}>{s.category?.name || 'Service'}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', fontWeight: '800' }}>
+                    <Star size={14} fill="var(--accent)" color="var(--accent)" /> 4.9
                   </div>
                 </div>
-                <h3 className="service-title">{s.title}</h3>
-                <p className="service-desc">{s.description}</p>
+                <h3 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '1rem' }}>{s.title}</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '2rem', minHeight: '3em' }}>{s.description}</p>
                 
-                <div className="worker-mini-profile">
-                  <div className="avatar-small">{s.worker?.name?.[0] || '?'}</div>
-                  <div>
-                    <span className="worker-name">{s.worker?.name || 'Inconnu'}</span>
-                    <div className="price-tag">{s.price} <small>DZD</small></div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '16px', marginBottom: '2rem' }}>
+                  <div className="avatar-small" style={{ background: 'var(--primary)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800' }}>{s.worker?.name?.[0] || '?'}</div>
+                  <div style={{ flex: 1 }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: '700', display: 'block' }}>{s.worker?.name || 'Inconnu'}</span>
+                    <div style={{ fontSize: '1.1rem', fontWeight: '900', color: 'var(--primary-light)' }}>{s.price} <small style={{ fontSize: '0.6rem' }}>DZD</small></div>
                   </div>
                 </div>
 
                 <div className="card-actions">
-                  <div className="date-picker-mini">
-                    <Clock size={16} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '0.75rem 1rem', borderRadius: '12px', marginBottom: '1rem' }}>
+                    <Clock size={16} color="var(--text-sub)" />
                     <input 
                       type="datetime-local" 
+                      style={{ background: 'transparent', border: 'none', padding: 0, fontSize: '0.85rem' }}
                       value={orderDates[s.id] || ''}
                       onChange={(e) => setOrderDates({ ...orderDates, [s.id]: e.target.value })}
                     />
@@ -214,68 +209,66 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
       )}
 
       {activeTab === 'orders' && (
-        <div className="orders-section animate-fade-in">
-          <div className="table-responsive">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>{t.service}</th>
-                  <th>{t.provider}</th>
-                  <th>{t.date}</th>
-                  <th>{t.price}</th>
-                  <th>{t.status}</th>
-                  <th>{t.actions}</th>
+        <div className="deck-table-wrap animate-slide-up">
+          <table className="deck-table">
+            <thead>
+              <tr>
+                <th>{t.service}</th>
+                <th>{t.provider}</th>
+                <th>{t.date}</th>
+                <th>{t.price}</th>
+                <th>{t.status}</th>
+                <th>{t.actions}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.length === 0 && (
+                <tr><td colSpan={6} style={{ textAlign: 'center', padding: '5rem', color: 'var(--text-sub)' }}>{t.noServices}</td></tr>
+              )}
+              {orders.map(o => (
+                <tr key={o.id}>
+                  <td data-label={t.service}>
+                    <div style={{ fontWeight: '800' }}>{o.service.title}</div>
+                    <small className="badge-auto" style={{ fontSize: '0.65rem' }}>{o.service.category.name}</small>
+                  </td>
+                  <td data-label={t.provider}>{o.service.worker.name}</td>
+                  <td data-label={t.date}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                      <Clock size={14} />
+                      {o.scheduledAt ? new Date(o.scheduledAt).toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : 'N/A'}
+                    </div>
+                  </td>
+                  <td data-label={t.price} style={{ fontWeight: '900', color: 'var(--primary-light)' }}>{o.service.price} DZD</td>
+                  <td data-label={t.status}>
+                    <span className={`badge ${o.status === 'PENDING' ? 'badge-manual' : o.status === 'ACCEPTED' ? 'badge-auto' : o.status === 'COMPLETED' ? 'badge-success' : 'badge-danger'}`}>
+                      {o.status}
+                    </span>
+                  </td>
+                  <td data-label={t.actions}>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      {((o.status === 'ACCEPTED') || ((o.status === 'CANCELLED' || o.status === 'COMPLETED') && !o.clientChatClearedAt)) && (
+                        <button className="btn btn-primary btn-sm" style={{ padding: '0.5rem 1rem' }} onClick={() => setActiveChat(o.id)}>
+                          <MessageCircle size={16} /> {o.status === 'ACCEPTED' ? t.chat : t.viewChat}
+                        </button>
+                      )}
+                      {(o.status === 'PENDING' || o.status === 'ACCEPTED') && (
+                        <button className="btn btn-outline btn-sm" onClick={() => handleCancel(o.id)} style={{ border: 'none', color: 'var(--danger)' }}>
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {orders.length === 0 && (
-                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: '5rem' }}>{t.noServices}</td></tr>
-                )}
-                {orders.map(o => (
-                  <tr key={o.id}>
-                    <td data-label={t.service}>
-                      <div style={{ fontWeight: '800' }}>{o.service.title}</div>
-                      <small className="badge-auto" style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem' }}>{o.service.category.name}</small>
-                    </td>
-                    <td data-label={t.provider}>{o.service.worker.name}</td>
-                    <td data-label={t.date}>
-                      <div className="date-cell">
-                        <Clock size={14} />
-                        {o.scheduledAt ? new Date(o.scheduledAt).toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : 'N/A'}
-                      </div>
-                    </td>
-                    <td data-label={t.price} style={{ fontWeight: '800', color: 'var(--primary-light)' }}>{o.service.price} DZD</td>
-                    <td data-label={t.status}>
-                      <span className={`badge ${o.status === 'PENDING' ? 'badge-manual' : o.status === 'ACCEPTED' ? 'badge-auto' : o.status === 'COMPLETED' ? 'badge-success' : 'badge-danger'}`}>
-                        {o.status}
-                      </span>
-                    </td>
-                    <td data-label={t.actions}>
-                      <div className="action-buttons">
-                        {((o.status === 'ACCEPTED') || ((o.status === 'CANCELLED' || o.status === 'COMPLETED') && !o.clientChatClearedAt)) && (
-                          <button className="btn btn-primary btn-sm" onClick={() => setActiveChat(o.id)}>
-                            <MessageCircle size={16} /> {o.status === 'ACCEPTED' ? t.chat : t.viewChat}
-                          </button>
-                        )}
-                        {(o.status === 'PENDING' || o.status === 'ACCEPTED') && (
-                          <button className="btn btn-outline btn-sm btn-danger" onClick={() => handleCancel(o.id)} style={{ border: 'none' }}>
-                            <Trash2 size={16} />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
       {activeTab === 'map' && (
-        <div className="animate-fade-in">
-          <div className="glass-panel" style={{ padding: '1rem', marginBottom: '1.5rem' }}>
-            <h2 style={{ marginBottom: '1rem' }}>
+        <div className="animate-slide-up">
+          <div className="bento-card" style={{ gridColumn: 'span 12', padding: '1.5rem' }}>
+            <h2 style={{ marginBottom: '1.5rem', fontWeight: '900', fontSize: '1.8rem' }}>
               {lang === 'ar' ? 'العاملين القريبين منك' : 'Prestataires à proximité'}
             </h2>
             <WorkerMap 
@@ -287,71 +280,46 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
       )}
 
       {activeTab === 'chat' && (
-        <div className="chat-tab-section animate-fade-in">
-          <div className="adaptive-grid">
-            {chatOrders.length === 0 && (
-              <div className="empty-state-full">
-                <MessageCircle size={64} style={{ opacity: 0.1 }} />
-                <p>{lang === 'ar' ? 'لا توجد محادثات نشطة' : 'Aucune conversation active'}</p>
-              </div>
-            )}
-            {chatOrders.map(o => (
-              <div key={o.id} className="card chat-order-card" onClick={() => setActiveChat(o.id)} style={{ cursor: 'pointer' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div className="avatar-small" style={{ width: '48px', height: '48px', fontSize: '1.2rem' }}>{o.service?.worker?.name?.[0] || '?'}</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <strong style={{ fontSize: '1.1rem' }}>{o.service?.worker?.name || 'Prestataire'}</strong>
-                      <span className={`badge ${o.status === 'ACCEPTED' ? 'badge-auto' : 'badge-manual'}`} style={{ fontSize: '0.6rem' }}>{o.status}</span>
-                    </div>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.2rem' }}>{o.service?.title}</p>
+        <div className="bento-grid animate-slide-up">
+          {chatOrders.length === 0 && (
+            <div style={{ gridColumn: 'span 12', textAlign: 'center', padding: '5rem' }}>
+              <MessageCircle size={64} style={{ opacity: 0.1, marginBottom: '1.5rem' }} />
+              <p>{lang === 'ar' ? 'لا توجد محادثات نشطة' : 'Aucune conversation active'}</p>
+            </div>
+          )}
+          {chatOrders.map(o => (
+            <div key={o.id} className="bento-card" onClick={() => setActiveChat(o.id)} style={{ cursor: 'pointer', gridColumn: 'span 4' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                <div className="avatar-small" style={{ width: '56px', height: '56px', fontSize: '1.4rem', background: 'var(--primary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900' }}>{o.service?.worker?.name?.[0] || '?'}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
+                    <strong style={{ fontSize: '1.2rem' }}>{o.service?.worker?.name || 'Prestataire'}</strong>
+                    <span className={`badge ${o.status === 'ACCEPTED' ? 'badge-auto' : 'badge-manual'}`} style={{ fontSize: '0.6rem' }}>{o.status}</span>
                   </div>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{o.service?.title}</p>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       )}
+    </div>
+  );
+}
 
-      <style>{`
-        .search-icon { position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: var(--text-sub); }
-        .search-input { padding-left: 3.5rem !important; background: var(--glass-bg); border-radius: 100px; }
-        .categories-pill-scroll { display: flex; gap: 0.75rem; overflow-x: auto; padding: 0.25rem; scrollbar-width: none; }
-        .categories-pill-scroll::-webkit-scrollbar { display: none; }
-        .pill { 
-          white-space: nowrap; padding: 0.6rem 1.5rem; border-radius: 100px; border: 1px solid var(--border); 
-          background: transparent; color: var(--text-muted); font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.3s;
-        }
-        .pill.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px var(--primary-glow); }
-        .service-card { display: flex; flex-direction: column; }
-        .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-        .category-badge { font-size: 0.7rem; font-weight: 800; color: var(--primary-light); text-transform: uppercase; letter-spacing: 0.05em; }
-        .rating { display: flex; alignItems: center; gap: 0.3rem; font-size: 0.8rem; font-weight: 800; color: var(--accent); }
-        .service-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem; }
-        .service-desc { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem; flex: 1; }
-        .worker-mini-profile { display: flex; align-items: center; gap: 0.75rem; background: rgba(255,255,255,0.02); padding: 0.75rem; border-radius: 12px; margin-bottom: 1.5rem; }
-        .avatar-small { width: 32px; height: 32px; border-radius: 50%; background: var(--primary-dark); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.75rem; }
-        .worker-name { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); }
-        .price-tag { font-size: 1.1rem; font-weight: 800; color: var(--primary-light); }
-        .date-picker-mini { 
-          display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.04); 
-          padding: 0.5rem 1rem; border-radius: 10px; margin-bottom: 1rem; border: 1px solid var(--border);
-        }
-        .date-picker-mini input { padding: 0; background: transparent; border: none; font-size: 0.85rem; }
-        .date-picker-mini input:focus { box-shadow: none; }
-        .empty-state-full { grid-column: 1/-1; padding: 5rem 2rem; text-align: center; color: var(--text-sub); }
-        .empty-state-full svg { opacity: 0.1; margin-bottom: 1.5rem; }
-        .action-buttons { display: flex; gap: 0.5rem; }
-        .date-cell { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
-        
-        .chat-order-card:hover { transform: translateY(-4px); border-color: var(--primary); }
-
-        @media (max-width: 768px) {
-          .tab-switcher { width: 100%; display: flex; }
-          .tab-switcher button { flex: 1; padding: 0.6rem 0.5rem !important; font-size: 0.8rem; }
-          .search-input { font-size: 0.9rem; }
-        }
-      `}</style>
+const pillStyle = (active: boolean) => ({
+  whiteSpace: 'nowrap' as const,
+  padding: '0.7rem 1.8rem',
+  borderRadius: '100px',
+  border: active ? '1px solid var(--primary)' : '1px solid var(--border)',
+  background: active ? 'var(--primary)' : 'rgba(255,255,255,0.03)',
+  color: active ? 'white' : 'var(--text-muted)',
+  fontWeight: 700,
+  fontSize: '0.85rem',
+  cursor: 'pointer',
+  transition: '0.3s',
+  boxShadow: active ? '0 10px 20px var(--primary-glow)' : 'none'
+});
     </div>
   );
 }

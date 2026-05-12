@@ -127,88 +127,97 @@ export default function AdminDashboard({ t, lang }: { t: any, lang: string }) {
           <h2 className="section-title"><ShieldCheck size={28} color="var(--primary)" /> {t.admin}</h2>
           <p className="section-sub">{t.overview}</p>
         </div>
-        <div className="tab-switcher glass-panel" style={{ padding: '0.4rem', borderRadius: '100px' }}>
-          <button className={`btn ${activeTab === 'overview' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('overview')} style={{ padding: '0.6rem 1.5rem' }}>{t.overview}</button>
-          <button className={`btn ${activeTab === 'users' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('users')} style={{ padding: '0.6rem 1.5rem' }}>{t.users}</button>
-          <button className={`btn ${activeTab === 'categories' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('categories')} style={{ padding: '0.6rem 1.5rem' }}>{t.categories}</button>
-          <button className={`btn ${activeTab === 'support' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('support')} style={{ padding: '0.6rem 1.5rem' }}>Chat</button>
-        </div>
-      </header>
+      <div className="tab-switcher glass-panel" style={{ marginBottom: '3rem', padding: '0.4rem', borderRadius: '100px', width: 'fit-content' }}>
+        <button className={`btn ${activeTab === 'overview' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('overview')} style={{ padding: '0.6rem 2rem' }}>{t.overview}</button>
+        <button className={`btn ${activeTab === 'users' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('users')} style={{ padding: '0.6rem 2rem' }}>{t.users}</button>
+        <button className={`btn ${activeTab === 'categories' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('categories')} style={{ padding: '0.6rem 2rem' }}>{t.categories}</button>
+        <button className={`btn ${activeTab === 'support' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('support')} style={{ padding: '0.6rem 2rem' }}>Chat</button>
+      </div>
 
       {actionMsg && <div className="toast success animate-fade-in" style={{ position: 'static', maxWidth: 'none', marginBottom: '2rem' }}>{actionMsg}</div>}
 
       {activeTab === 'overview' && (
-        <div className="animate-fade-in">
-          <div className="stats-grid-modern" style={{ marginBottom: '3rem' }}>
-            <div className="stat-card glass-panel">
-              <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--primary)' }}><Users size={24} /></div>
-              <div className="stat-info">
-                <span className="stat-label">Utilisateurs</span>
-                <span className="stat-value">{stats.totalUsers}</span>
+        <div className="animate-slide-up">
+          <div className="bento-grid" style={{ marginBottom: '3rem' }}>
+            <div className="bento-card" style={{ gridColumn: 'span 3' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', padding: '1rem', borderRadius: '16px' }}><Users size={24} /></div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-sub)', textTransform: 'uppercase' }}>Utilisateurs</div>
+                  <div style={{ fontSize: '1.8rem', fontWeight: '900' }}>{stats.totalUsers}</div>
+                </div>
               </div>
             </div>
-            <div className="stat-card glass-panel">
-              <div className="stat-icon" style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8' }}><Briefcase size={24} /></div>
-              <div className="stat-info">
-                <span className="stat-label">Services</span>
-                <span className="stat-value">{stats.totalServices}</span>
+            <div className="bento-card" style={{ gridColumn: 'span 3' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ background: 'rgba(6, 182, 212, 0.1)', color: 'var(--accent)', padding: '1rem', borderRadius: '16px' }}><Briefcase size={24} /></div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-sub)', textTransform: 'uppercase' }}>Services</div>
+                  <div style={{ fontSize: '1.8rem', fontWeight: '900' }}>{stats.totalServices}</div>
+                </div>
               </div>
             </div>
-            <div className="stat-card glass-panel">
-              <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)' }}><ClipboardList size={24} /></div>
-              <div className="stat-info">
-                <span className="stat-label">Commandes</span>
-                <span className="stat-value">{stats.totalOrders}</span>
+            <div className="bento-card" style={{ gridColumn: 'span 3' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', padding: '1rem', borderRadius: '16px' }}><ClipboardList size={24} /></div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-sub)', textTransform: 'uppercase' }}>Commandes</div>
+                  <div style={{ fontSize: '1.8rem', fontWeight: '900' }}>{stats.totalOrders}</div>
+                </div>
               </div>
             </div>
-            <div className="stat-card glass-panel" style={{ background: 'linear-gradient(135deg, var(--accent-glow), transparent)' }}>
-              <div className="stat-icon" style={{ background: 'var(--accent)', color: 'black' }}><Clock size={24} /></div>
-              <div className="stat-info">
-                <span className="stat-label">En attente</span>
-                <span className="stat-value">{stats.pendingUsers}</span>
+            <div className="bento-card" style={{ gridColumn: 'span 3', background: 'linear-gradient(135deg, var(--accent), var(--accent-light))' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'black' }}>
+                <div style={{ background: 'rgba(0, 0, 0, 0.1)', padding: '1rem', borderRadius: '16px' }}><Clock size={24} /></div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>En attente</div>
+                  <div style={{ fontSize: '1.8rem', fontWeight: '900' }}>{stats.pendingUsers}</div>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="adaptive-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))' }}>
-            <div className="glass-panel">
-              <h3 style={{ marginBottom: '1.5rem', fontWeight: '800' }}>Approbaton Automatique</h3>
-              <div className="toggle-item" style={{ marginBottom: '1.5rem', padding: '1.25rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <strong style={{ display: 'block' }}>Clients</strong>
-                  <small style={{ color: 'var(--text-sub)' }}>Activer l'approbation immédiate</small>
+          <div className="bento-grid">
+            <div className="bento-card" style={{ gridColumn: 'span 6' }}>
+              <h3 style={{ marginBottom: '2rem', fontWeight: '900', fontSize: '1.5rem' }}>Approbation Automatique</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border)' }}>
+                  <div>
+                    <strong style={{ display: 'block', fontSize: '1.1rem' }}>Clients</strong>
+                    <small style={{ color: 'var(--text-sub)' }}>Activer l'approbation immédiate</small>
+                  </div>
+                  <button className={`btn ${settings?.autoApproveUsers ? 'btn-primary' : 'btn-outline'}`} onClick={() => toggleSetting('autoApproveUsers')}>
+                    {settings?.autoApproveUsers ? 'AUTO' : 'MANUEL'}
+                  </button>
                 </div>
-                <button className={`btn btn-sm ${settings?.autoApproveUsers ? 'btn-primary' : 'btn-outline'}`} onClick={() => toggleSetting('autoApproveUsers')}>
-                  {settings?.autoApproveUsers ? 'AUTO' : 'MANUEL'}
-                </button>
-              </div>
-              <div className="toggle-item" style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <strong style={{ display: 'block' }}>Prestataires</strong>
-                  <small style={{ color: 'var(--text-sub)' }}>Nécessite une vérification</small>
+                <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border)' }}>
+                  <div>
+                    <strong style={{ display: 'block', fontSize: '1.1rem' }}>Prestataires</strong>
+                    <small style={{ color: 'var(--text-sub)' }}>Nécessite une vérification</small>
+                  </div>
+                  <button className={`btn ${settings?.autoApproveWorkers ? 'btn-primary' : 'btn-outline'}`} onClick={() => toggleSetting('autoApproveWorkers')}>
+                    {settings?.autoApproveWorkers ? 'AUTO' : 'MANUEL'}
+                  </button>
                 </div>
-                <button className={`btn btn-sm ${settings?.autoApproveWorkers ? 'btn-primary' : 'btn-outline'}`} onClick={() => toggleSetting('autoApproveWorkers')}>
-                  {settings?.autoApproveWorkers ? 'AUTO' : 'MANUEL'}
-                </button>
               </div>
             </div>
 
-            <div className="glass-panel">
-              <h3 style={{ marginBottom: '1.5rem', fontWeight: '800' }}>Dernières Inscriptions</h3>
-              <div className="table-responsive" style={{ border: 'none' }}>
-                <table className="data-table">
+            <div className="bento-card" style={{ gridColumn: 'span 6' }}>
+              <h3 style={{ marginBottom: '2rem', fontWeight: '900', fontSize: '1.5rem' }}>Dernières Inscriptions</h3>
+              <div className="deck-table-wrap">
+                <table className="deck-table">
                   <tbody>
-                    {pendingUsers.length === 0 && <tr><td style={{ textAlign: 'center', color: 'var(--text-sub)' }}>Aucun utilisateur en attente</td></tr>}
+                    {pendingUsers.length === 0 && <tr><td style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-sub)' }}>Aucun utilisateur en attente</td></tr>}
                     {pendingUsers.map(u => (
                       <tr key={u.id}>
-                        <td style={{ padding: '1rem 0' }}>
-                          <strong>{u.name}</strong><br/>
-                          <span className="badge-manual" style={{ fontSize: '0.65rem' }}>{u.role}</span>
+                        <td>
+                          <div style={{ fontWeight: '800' }}>{u.name}</div>
+                          <span className="badge-manual" style={{ fontSize: '0.6rem' }}>{u.role}</span>
                         </td>
-                        <td style={{ textAlign: 'right', padding: '1rem 0' }}>
+                        <td style={{ textAlign: 'right' }}>
                           <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                            <button className="btn btn-sm btn-primary" onClick={() => approveUser(u.id)}><CheckCircle size={14}/></button>
-                            <button className="btn btn-sm btn-danger" onClick={() => rejectUser(u.id)} style={{ border: 'none' }}><Trash2 size={14}/></button>
+                            <button className="btn btn-primary btn-sm" onClick={() => approveUser(u.id)}><CheckCircle size={14}/></button>
+                            <button className="btn btn-outline btn-sm" onClick={() => rejectUser(u.id)} style={{ border: 'none', color: 'var(--danger)' }}><Trash2 size={14}/></button>
                           </div>
                         </td>
                       </tr>
@@ -222,48 +231,52 @@ export default function AdminDashboard({ t, lang }: { t: any, lang: string }) {
       )}
 
       {activeTab === 'users' && (
-        <div className="glass-panel animate-fade-in">
-          <div className="table-responsive">
-            <table className="data-table">
-              <thead><tr><th>Utilisateur</th><th>Rôle</th><th>Status</th><th>Actions</th></tr></thead>
-              <tbody>
-                {allUsers.map(u => (
-                  <tr key={u.id}>
-                    <td data-label="Utilisateur">
-                      <strong>{u.name}</strong><br/>
-                      <small style={{ color: 'var(--text-sub)' }}>{u.email}</small>
-                    </td>
-                    <td data-label="Rôle"><span className="badge-auto">{u.role}</span></td>
-                    <td data-label="Status">
-                      <span className={`badge ${u.approved ? 'badge-success' : 'badge-manual'}`}>{u.approved ? 'Approuvé' : 'En attente'}</span>
-                    </td>
-                    <td data-label="Actions">
-                      <button className="btn btn-sm btn-danger" onClick={() => rejectUser(u.id)} style={{ border: 'none' }}><Trash2 size={16} /></button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div className="deck-table-wrap animate-slide-up">
+          <table className="deck-table">
+            <thead><tr><th>Utilisateur</th><th>Rôle</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              {allUsers.map(u => (
+                <tr key={u.id}>
+                  <td data-label="Utilisateur">
+                    <div style={{ fontWeight: '800' }}>{u.name}</div>
+                    <small style={{ color: 'var(--text-sub)', fontSize: '0.8rem' }}>{u.email}</small>
+                  </td>
+                  <td data-label="Rôle"><span className="badge-auto">{u.role}</span></td>
+                  <td data-label="Status">
+                    <span className={`badge ${u.approved ? 'badge-success' : 'badge-manual'}`}>{u.approved ? 'Approuvé' : 'En attente'}</span>
+                  </td>
+                  <td data-label="Actions">
+                    <button className="btn btn-outline btn-sm" onClick={() => rejectUser(u.id)} style={{ border: 'none', color: 'var(--danger)' }}><Trash2 size={18} /></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
       {activeTab === 'categories' && (
-        <div className="glass-panel animate-fade-in">
-          <form onSubmit={createCategory} style={{ display: 'flex', gap: '1rem', marginBottom: '2.5rem' }}>
-            <input type="text" placeholder="Nom de la catégorie..." value={newCatName} onChange={e => setNewCatName(e.target.value)} style={{ background: 'var(--glass-bg)' }} />
-            <button className="btn btn-primary"><Plus size={20} /> Créer</button>
-          </form>
-          <div className="table-responsive">
-            <table className="data-table">
+        <div className="bento-grid animate-slide-up">
+          <div className="bento-card" style={{ gridColumn: 'span 4' }}>
+            <h3 style={{ marginBottom: '2rem', fontWeight: '900', fontSize: '1.5rem' }}>Nouvelle Catégorie</h3>
+            <form onSubmit={createCategory}>
+              <div className="input-group">
+                <input type="text" placeholder="Nom de la catégorie..." value={newCatName} onChange={e => setNewCatName(e.target.value)} style={{ background: 'var(--bg-root)', height: '56px' }} />
+              </div>
+              <button className="btn btn-primary" style={{ width: '100%' }}><Plus size={20} /> Créer</button>
+            </form>
+          </div>
+          
+          <div className="deck-table-wrap" style={{ gridColumn: 'span 8' }}>
+            <table className="deck-table">
               <thead><tr><th>Catégorie</th><th>Services liés</th><th>Actions</th></tr></thead>
               <tbody>
                 {categories.map(c => (
                   <tr key={c.id}>
-                    <td data-label="Catégorie"><strong>{c.name}</strong></td>
+                    <td data-label="Catégorie"><strong style={{ fontSize: '1.1rem' }}>{c.name}</strong></td>
                     <td data-label="Services">{c._count?.services || 0}</td>
                     <td data-label="Actions">
-                      <button className="btn btn-sm btn-danger" onClick={() => deleteCategory(c.id)} style={{ border: 'none' }}><Trash2 size={16} /></button>
+                      <button className="btn btn-outline btn-sm" onClick={() => deleteCategory(c.id)} style={{ border: 'none', color: 'var(--danger)' }}><Trash2 size={18} /></button>
                     </td>
                   </tr>
                 ))}
@@ -274,31 +287,29 @@ export default function AdminDashboard({ t, lang }: { t: any, lang: string }) {
       )}
 
       {activeTab === 'support' && (
-        <div className="glass-panel animate-fade-in">
-          <div className="table-responsive">
-            <table className="data-table">
-              <thead><tr><th>Utilisateur</th><th>Dernier Message</th><th>Actions</th></tr></thead>
-              <tbody>
-                {supportConvs.length === 0 && <tr><td colSpan={3} style={{ textAlign: 'center', padding: '4rem' }}>Aucune conversation</td></tr>}
-                {supportConvs.map(u => (
-                  <tr key={u.id}>
-                    <td data-label="Utilisateur">
-                      <strong>{u.name}</strong><br/>
-                      <small style={{ color: 'var(--text-sub)' }}>{u.email}</small>
-                    </td>
-                    <td data-label="Dernier Message" style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {u.supportMessages[0]?.content || '...'}
-                    </td>
-                    <td data-label="Actions">
-                      <button className="btn btn-sm btn-primary" onClick={() => setSelectedUserSupport(u.id)}>
-                        <MessageSquare size={16} /> Répondre
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div className="deck-table-wrap animate-slide-up">
+          <table className="deck-table">
+            <thead><tr><th>Utilisateur</th><th>Dernier Message</th><th>Actions</th></tr></thead>
+            <tbody>
+              {supportConvs.length === 0 && <tr><td colSpan={3} style={{ textAlign: 'center', padding: '5rem', color: 'var(--text-sub)' }}>Aucune conversation</td></tr>}
+              {supportConvs.map(u => (
+                <tr key={u.id}>
+                  <td data-label="Utilisateur">
+                    <div style={{ fontWeight: '800' }}>{u.name}</div>
+                    <small style={{ color: 'var(--text-sub)' }}>{u.email}</small>
+                  </td>
+                  <td data-label="Dernier Message" style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-muted)' }}>
+                    {u.supportMessages[0]?.content || '...'}
+                  </td>
+                  <td data-label="Actions">
+                    <button className="btn btn-primary btn-sm" onClick={() => setSelectedUserSupport(u.id)}>
+                      <MessageSquare size={16} /> Répondre
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
@@ -311,22 +322,9 @@ export default function AdminDashboard({ t, lang }: { t: any, lang: string }) {
           lang={lang} 
         />
       )}
-
-      <style>{`
-        .stats-grid-modern { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; }
-        .stat-card { display: flex; align-items: center; gap: 1.25rem; padding: 1.5rem !important; }
-        .stat-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
-        .stat-info { display: flex; flex-direction: column; }
-        .stat-label { font-size: 0.75rem; font-weight: 800; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.05em; }
-        .stat-value { font-size: 1.5rem; font-weight: 900; color: var(--text-main); line-height: 1; margin-top: 0.2rem; }
-        
-        @media (max-width: 1024px) {
-          .stats-grid-modern { grid-template-columns: 1fr 1fr; }
-        }
-        @media (max-width: 480px) {
-          .stats-grid-modern { grid-template-columns: 1fr; }
-        }
-      `}</style>
+    </div>
+  );
+}
     </div>
   );
 }
