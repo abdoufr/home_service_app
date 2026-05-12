@@ -121,12 +121,7 @@ export default function AdminDashboard({ t, lang }: { t: any, lang: string }) {
   );
 
   return (
-    <div className="app-container animate-fade-in">
-      <header className="section-header">
-        <div>
-          <h2 className="section-title"><ShieldCheck size={28} color="var(--primary)" /> {t.admin}</h2>
-          <p className="section-sub">{t.overview}</p>
-        </div>
+    <div className="animate-slide-up">
       <div className="tab-switcher glass-panel" style={{ marginBottom: '3rem', padding: '0.4rem', borderRadius: '100px', width: 'fit-content' }}>
         <button className={`btn ${activeTab === 'overview' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('overview')} style={{ padding: '0.6rem 2rem' }}>{t.overview}</button>
         <button className={`btn ${activeTab === 'users' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('users')} style={{ padding: '0.6rem 2rem' }}>{t.users}</button>

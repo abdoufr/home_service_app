@@ -205,8 +205,13 @@ function App() {
   };
 
   const handleLogout = async () => {
-     // Perform actual logout logic if needed, then:
-     setUser(null);
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+      setUser(null);
+      window.location.href = '/login';
+    } catch (e) {
+      setUser(null);
+    }
   };
 
   if (authLoading) {
@@ -214,6 +219,15 @@ function App() {
       <Zap size={48} color="#6366f1" className="spin" />
     </div>;
   }
+
+  const getPageTitle = () => {
+    if (!user) return 'HomeServ';
+    const path = window.location.pathname;
+    if (path.includes('admin')) return t.admin;
+    if (path.includes('worker')) return t.worker;
+    if (path.includes('services')) return t.explorer;
+    return `Hello, ${user.name}`;
+  };
 
   return (
     <Router>
@@ -224,7 +238,7 @@ function App() {
       <main className="main-content animate-slide-up">
         <header className="page-header">
            <div className="page-title">
-             <h1>{user ? `Bienvenue, ${user.name}` : 'HomeServ'}</h1>
+             <h1>{getPageTitle()}</h1>
            </div>
            
            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
