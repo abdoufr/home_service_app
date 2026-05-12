@@ -9,7 +9,7 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
   const [categories, setCategories] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'orders' | 'services' | 'chat' | 'location'>('orders');
   const [profile, setProfile] = useState<any>(null);
-  
+
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
   const [activeChat, setActiveChat] = useState<string | null>(null);
@@ -43,7 +43,7 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
       setOrders(ordRes.ok ? await ordRes.json() : []);
       setCategories(catRes.ok ? await catRes.json() : []);
       setProfile(meRes.ok ? await meRes.json() : null);
-    } catch (e) {} finally {
+    } catch (e) { } finally {
       setLoading(false);
     }
   };
@@ -123,23 +123,23 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
   };
 
   // Filter orders that have chats or are active
-  const chatOrders = orders.filter(o => 
+  const chatOrders = orders.filter(o =>
     !o.workerChatClearedAt && (o.status === 'ACCEPTED' || o.status === 'COMPLETED' || o.status === 'CANCELLED')
   );
 
   return (
     <div className="app-container animate-fade-in">
-      {activeChat && <ChatModal 
-        orderId={activeChat} 
-        orderStatus={activeOrder?.status || 'PENDING'} 
-        currentUserId={userId} 
+      {activeChat && <ChatModal
+        orderId={activeChat}
+        orderStatus={activeOrder?.status || 'PENDING'}
+        currentUserId={userId}
         recipientName={activeOrder?.client?.name || 'Client'}
-        onClose={() => setActiveChat(null)} 
-        onDelete={fetchAll} 
-        t={t} 
-        lang={lang} 
+        onClose={() => setActiveChat(null)}
+        onDelete={fetchAll}
+        t={t}
+        lang={lang}
       />}
-      
+
       <div className="tab-switcher glass-panel" style={{ marginBottom: '3rem', padding: '0.4rem', borderRadius: '100px', width: 'fit-content' }}>
         <button className={`btn ${activeTab === 'orders' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('orders')} style={{ padding: '0.6rem 1.5rem' }}>
           {t.orders}
@@ -272,24 +272,24 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
             <form onSubmit={handleCreateService}>
               <div className="input-group">
                 <label>{t.title}</label>
-                <input type="text" required value={newService.title} onChange={e => setNewService({...newService, title: e.target.value})} placeholder="..." />
+                <input type="text" required value={newService.title} onChange={e => setNewService({ ...newService, title: e.target.value })} placeholder="..." />
               </div>
               <div className="input-group">
                 <label>{t.categories}</label>
-                <select required value={newService.categoryId} onChange={e => setNewService({...newService, categoryId: e.target.value})}>
+                <select required value={newService.categoryId} onChange={e => setNewService({ ...newService, categoryId: e.target.value })}>
                   <option value="">...</option>
                   {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               <div className="input-group">
                 <label>{t.price} (DZD)</label>
-                <input type="number" required value={newService.price} onChange={e => setNewService({...newService, price: e.target.value})} placeholder="0" />
+                <input type="number" required value={newService.price} onChange={e => setNewService({ ...newService, price: e.target.value })} placeholder="0" />
               </div>
               <div className="input-group">
                 <label>{t.description}</label>
-                <textarea required rows={4} value={newService.description} onChange={e => setNewService({...newService, description: e.target.value})} />
+                <textarea required rows={4} value={newService.description} onChange={e => setNewService({ ...newService, description: e.target.value })} />
               </div>
-              <button className="btn btn-primary" style={{ width: '100%' }}><Plus size={20}/> {t.create}</button>
+              <button className="btn btn-primary" style={{ width: '100%' }}><Plus size={20} /> {t.create}</button>
             </form>
           </div>
 
@@ -323,14 +323,14 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
             <p style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>
               {lang === 'ar' ? 'سيتمكن الزبائن من رؤيتك على الخريطة.' : 'Les clients pourront vous voir sur la carte.'}
             </p>
-            <MapPicker 
+            <MapPicker
               initialLocation={profile?.latitude ? { lat: profile.latitude, lng: profile.longitude } : undefined}
-              onLocationSelect={handleUpdateLocation} 
+              onLocationSelect={handleUpdateLocation}
             />
           </div>
         </div>
       )}
-      
+
       {activeTab === 'chat' && (
         <div className="bento-grid animate-slide-up">
           {chatOrders.length === 0 && (
@@ -359,7 +359,7 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
   );
 }
 
-      <style>{`
+<style>{`
         .stats-grid-modern { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; }
         .stat-card { display: flex; align-items: center; gap: 1.25rem; padding: 1.5rem !important; }
         .stat-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
@@ -393,6 +393,4 @@ export default function WorkerDashboard({ userId, t, lang }: { userId: string, t
           .stat-card { padding: 1.25rem !important; }
         }
       `}</style>
-    </div>
-  );
-}
+

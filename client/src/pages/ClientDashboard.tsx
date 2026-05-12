@@ -13,7 +13,7 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
   const [selectedCat, setSelectedCat] = useState('');
   const [orderDates, setOrderDates] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
   const [activeChat, setActiveChat] = useState<string | null>(null);
@@ -94,32 +94,32 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
 
   const filteredServices = services.filter(s => {
     const matchCat = selectedCat ? s.categoryId === selectedCat : true;
-    const matchSearch = s.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                        s.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        s.worker?.name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchSearch = s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.worker?.name?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchCat && matchSearch;
   });
 
   const activeOrder = orders.find(o => o.id === activeChat);
 
   // Filter orders that have chats or are active
-  const chatOrders = orders.filter(o => 
+  const chatOrders = orders.filter(o =>
     !o.clientChatClearedAt && (o.status === 'ACCEPTED' || o.status === 'COMPLETED' || o.status === 'CANCELLED')
   );
 
   return (
     <div className="app-container animate-fade-in">
-      {activeChat && <ChatModal 
-        orderId={activeChat} 
-        orderStatus={activeOrder?.status || 'PENDING'} 
-        currentUserId={userId} 
+      {activeChat && <ChatModal
+        orderId={activeChat}
+        orderStatus={activeOrder?.status || 'PENDING'}
+        currentUserId={userId}
         recipientName={activeOrder?.service?.worker?.name || 'Prestataire'}
-        onClose={() => setActiveChat(null)} 
-        onDelete={fetchAll} 
-        t={t} 
-        lang={lang} 
+        onClose={() => setActiveChat(null)}
+        onDelete={fetchAll}
+        t={t}
+        lang={lang}
       />}
-      
+
       <div className="tab-switcher glass-panel" style={{ marginBottom: '3rem', padding: '0.4rem', borderRadius: '100px', width: 'fit-content' }}>
         <button className={`btn ${activeTab === 'explore' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('explore')} style={{ padding: '0.6rem 2rem' }}>
           {t.explorer}
@@ -142,10 +142,10 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
           <div className="search-section" style={{ marginBottom: '3rem' }}>
             <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
               <Search className="search-icon" size={20} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 style={{ paddingLeft: '4rem', borderRadius: '100px', height: '60px', background: 'var(--bg-card)' }}
-                placeholder={t.search} 
+                placeholder={t.search}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -179,7 +179,7 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
                 </div>
                 <h3 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '1rem' }}>{s.title}</h3>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '2rem', minHeight: '3em' }}>{s.description}</p>
-                
+
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '16px', marginBottom: '2rem' }}>
                   <div className="avatar-small" style={{ background: 'var(--primary)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800' }}>{s.worker?.name?.[0] || '?'}</div>
                   <div style={{ flex: 1 }}>
@@ -191,8 +191,8 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
                 <div className="card-actions">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '0.75rem 1rem', borderRadius: '12px', marginBottom: '1rem' }}>
                     <Clock size={16} color="var(--text-sub)" />
-                    <input 
-                      type="datetime-local" 
+                    <input
+                      type="datetime-local"
                       style={{ background: 'transparent', border: 'none', padding: 0, fontSize: '0.85rem' }}
                       value={orderDates[s.id] || ''}
                       onChange={(e) => setOrderDates({ ...orderDates, [s.id]: e.target.value })}
@@ -271,9 +271,9 @@ export default function ClientDashboard({ userId, t, lang }: { userId: string, t
             <h2 style={{ marginBottom: '1.5rem', fontWeight: '900', fontSize: '1.8rem' }}>
               {lang === 'ar' ? 'العاملين القريبين منك' : 'Prestataires à proximité'}
             </h2>
-            <WorkerMap 
-              workers={workers} 
-              clientLocation={clientProfile?.latitude ? { lat: clientProfile.latitude, lng: clientProfile.longitude } : null} 
+            <WorkerMap
+              workers={workers}
+              clientLocation={clientProfile?.latitude ? { lat: clientProfile.latitude, lng: clientProfile.longitude } : null}
             />
           </div>
         </div>
@@ -320,6 +320,4 @@ const pillStyle = (active: boolean) => ({
   transition: '0.3s',
   boxShadow: active ? '0 10px 20px var(--primary-glow)' : 'none'
 });
-    </div>
-  );
-}
+

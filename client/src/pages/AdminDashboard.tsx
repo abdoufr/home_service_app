@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Settings, Users, Briefcase, ClipboardList, Clock, Zap, Tag, Trash2, 
+import {
+  Settings, Users, Briefcase, ClipboardList, Clock, Zap, Tag, Trash2,
   CheckCircle, UserCheck, MessageSquare, ShieldAlert, Plus, ShieldCheck, Mail
 } from 'lucide-react';
 import SupportChat from '../components/SupportChat';
@@ -15,7 +15,7 @@ export default function AdminDashboard({ t, lang }: { t: any, lang: string }) {
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [newCatName, setNewCatName] = useState('');
-  
+
   const [selectedUserSupport, setSelectedUserSupport] = useState<string | null>(null);
   const [supportConvs, setSupportConvs] = useState<any[]>([]);
 
@@ -211,8 +211,8 @@ export default function AdminDashboard({ t, lang }: { t: any, lang: string }) {
                         </td>
                         <td style={{ textAlign: 'right' }}>
                           <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                            <button className="btn btn-primary btn-sm" onClick={() => approveUser(u.id)}><CheckCircle size={14}/></button>
-                            <button className="btn btn-outline btn-sm" onClick={() => rejectUser(u.id)} style={{ border: 'none', color: 'var(--danger)' }}><Trash2 size={14}/></button>
+                            <button className="btn btn-primary btn-sm" onClick={() => approveUser(u.id)}><CheckCircle size={14} /></button>
+                            <button className="btn btn-outline btn-sm" onClick={() => rejectUser(u.id)} style={{ border: 'none', color: 'var(--danger)' }}><Trash2 size={14} /></button>
                           </div>
                         </td>
                       </tr>
@@ -261,7 +261,7 @@ export default function AdminDashboard({ t, lang }: { t: any, lang: string }) {
               <button className="btn btn-primary" style={{ width: '100%' }}><Plus size={20} /> Créer</button>
             </form>
           </div>
-          
+
           <div className="deck-table-wrap" style={{ gridColumn: 'span 8' }}>
             <table className="deck-table">
               <thead><tr><th>Catégorie</th><th>Services liés</th><th>Actions</th></tr></thead>
@@ -309,17 +309,15 @@ export default function AdminDashboard({ t, lang }: { t: any, lang: string }) {
       )}
 
       {selectedUserSupport && (
-        <SupportChat 
-          isAdmin={true} 
-          targetUserId={selectedUserSupport} 
-          onClose={() => setSelectedUserSupport(null)} 
-          t={t} 
-          lang={lang} 
+        <SupportChat
+          isAdmin={true}
+          targetUserId={selectedUserSupport}
+          onClose={() => setSelectedUserSupport(null)}
+          t={t}
+          lang={lang}
         />
       )}
     </div>
   );
 }
-    </div>
-  );
-}
+
