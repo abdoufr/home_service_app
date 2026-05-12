@@ -182,6 +182,12 @@ body::after {
   gap: 1rem;
 }
 
+@media (max-width: 640px) {
+  .nav-actions .btn-sm { display: none; } /* Hide logout text on tiny screens, icon only */
+  .navbar-brand { gap: 0.5rem; }
+  .navbar-brand .brand-icon { width: 36px; height: 36px; }
+}
+
 /* ============================================
    MOBILE BOTTOM NAVIGATION
    ============================================ */
@@ -487,8 +493,11 @@ input:focus, select:focus, textarea:focus {
 
 @media (max-width: 480px) {
   .adaptive-grid { grid-template-columns: 1fr; gap: 1.5rem; }
-  .btn { width: 100%; }
-  .glass-panel { padding: 1.5rem 1rem; }
+  .btn { width: 100%; justify-content: center; }
+  .glass-panel { padding: 1.5rem 1rem; border-radius: var(--radius-lg); }
+  .section-title { font-size: 1.5rem; }
+  .stat-card { padding: 1rem !important; }
+  .stat-value { font-size: 1.25rem; }
 }
 
 /* ============================================
